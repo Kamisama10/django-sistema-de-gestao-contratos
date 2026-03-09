@@ -1,0 +1,679 @@
+{% extends 'base.html' %}
+{% block title %}{{ contrato.numero_sap }} — Vale{% endblock %}
+{% block page_title %}
+  Contrato {{ contrato.numero_sap }}
+  <span class="pill pill-{{ contrato.status }}" style="margin-left:10px;font-size:13px;">
+    {{ contrato.get_status_display }}
+  </span>
+{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+  {% for msg in messages %}
+  <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;
+              padding:12px 16px;border-radius:8px;margin-bottom:16px;
+              display:flex;align-items:center;gap:8px;font-size:13px;">
+    <i class="bi bi-check-circle-fill"></i> {{ msg }}
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% if tem_deficit_critico %}
+<div class="alert-panel critico" style="margin-bottom:20px;">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>
+    <div class="alert-panel-title">QUADRO CRÍTICO — Este contrato tem cargo(s) obrigatório(s) sem cobertura</div>
+    <div class="alert-panel-sub">Verifique o painel de mobilização abaixo. Medições podem ser glosadas pela Vale.</div>
+  </div>
+</div>
+{% elif tem_deficit %}
+<div class="alert-panel alerta" style="margin-bottom:20px;">
+  <i class="bi bi-person-dash-fill"></i>
+  <div>
+    <div class="alert-panel-title">Déficit de Quadro — Verifique a mobilização</div>
+    <div class="alert-panel-sub">Há cargo(s) com quantidade abaixo do mínimo obrigatório contratual.</div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── KPIs ────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon blue"><i class="bi bi-wallet2"></i></div>
+      <div>
+        <div class="kpi-label">Valor Atual</div>
+        <div class="kpi-value" style="font-size:17px;">
+          R$ {{ contrato.valor_atual|floatformat:0 }}
+        </div>
+        <div class="kpi-sub">Original: R$ {{ contrato.valor_original|floatformat:0 }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon green"><i class="bi bi-graph-up"></i></div>
+      <div>
+        <div class="kpi-label">Total Faturado</div>
+        <div class="kpi-value" style="font-size:17px;">
+          R$ {{ total_medido|floatformat:0 }}
+        </div>
+        <div class="kpi-sub">{{ perc_exec }}% executado</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon
+        {% if margem_pct >= 10 %}green
+        {% elif margem_pct >= 0 %}yellow
+        {% else %}red{% endif %}">
+        <i class="bi bi-arrow-up-right-circle"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Margem Acumulada</div>
+        <div class="kpi-value" style="font-size:17px;
+          color:{% if margem_pct >= 10 %}var(--vale-green)
+                {% elif margem_pct >= 0 %}#d97706
+                {% else %}#dc2626{% endif %};">
+          {{ margem_pct }}%
+        </div>
+        <div class="kpi-sub">R$ {{ margem|floatformat:0 }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon
+        {% if dias_restantes <= 15 %}red
+        {% elif dias_restantes <= 60 %}yellow
+        {% else %}blue{% endif %}">
+        <i class="bi bi-calendar-check"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Dias Restantes</div>
+        <div class="kpi-value"
+          style="color:{% if dias_restantes <= 15 %}#dc2626
+                      {% elif dias_restantes <= 60 %}#d97706
+                      {% else %}var(--vale-blue){% endif %};">
+          {{ dias_restantes }}d
+        </div>
+        <div class="kpi-sub">Término: {{ contrato.data_termino_atual|date:"d/m/Y" }}</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Conteúdo principal ──────────────────────────────────────── -->
+<div class="row g-3">
+
+  <!-- ── Coluna esquerda ──────────────────────────────────────── -->
+  <div class="col-lg-7">
+
+    <!-- Dados do contrato -->
+    <div class="card mb-3">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-file-earmark-text-fill"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          Dados do Contrato
+        </h6>
+        <a href="{% url 'contratos:editar' contrato.pk %}"
+          style="font-size:12px;color:var(--vale-blue);
+                  text-decoration:none;font-weight:600;">
+          <i class="bi bi-pencil-fill"></i> Editar
+        </a>
+      </div>
+      <div class="card-body-custom">
+        <div class="row g-3" style="font-size:13px;">
+
+          <div class="col-6">
+            <div class="det-label">Empresa</div>
+            <div style="font-weight:600;margin-top:2px;">
+              {{ contrato.empresa.razao_social }}
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="det-label">CNPJ</div>
+            <div style="margin-top:2px;font-family:monospace;">
+              {{ contrato.empresa.cnpj }}
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="det-label">Área</div>
+            <div style="margin-top:4px;">
+              <span class="badge-info">{{ contrato.get_area_display }}</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="det-label">Modalidade</div>
+            <div style="margin-top:4px;">{{ contrato.get_modalidade_display }}</div>
+          </div>
+
+          <div class="col-6">
+            <div class="det-label">Gestor Técnico</div>
+            <div style="margin-top:2px;">
+              {{ contrato.gestor_tecnico.get_full_name|default:contrato.gestor_tecnico.username }}
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="det-label">Gestor Administrativo</div>
+            <div style="margin-top:2px;">
+              {{ contrato.gestor_admin.get_full_name|default:contrato.gestor_admin.username }}
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="det-label">Assinatura</div>
+            <div style="margin-top:2px;">{{ contrato.data_assinatura|date:"d/m/Y" }}</div>
+          </div>
+          <div class="col-4">
+            <div class="det-label">Início</div>
+            <div style="margin-top:2px;">{{ contrato.data_inicio|date:"d/m/Y" }}</div>
+          </div>
+          <div class="col-4">
+            <div class="det-label">Término Atual</div>
+            <div style="margin-top:2px;font-weight:600;
+              color:{% if dias_restantes <= 30 %}#dc2626
+                    {% elif dias_restantes <= 60 %}#d97706
+                    {% else %}var(--gray-900){% endif %};">
+              {{ contrato.data_termino_atual|date:"d/m/Y" }}
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="det-label">Objeto</div>
+            <div style="margin-top:4px;line-height:1.6;color:var(--gray-600);">
+              {{ contrato.objeto }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Barra de execução financeira -->
+        <div style="margin-top:20px;padding-top:16px;
+                    border-top:1px solid var(--gray-200);">
+          <div style="display:flex;justify-content:space-between;
+                      font-size:11px;color:var(--gray-600);margin-bottom:6px;">
+            <span>Execução financeira</span>
+            <span style="font-weight:600;">
+              {{ perc_exec }}%
+              (R$ {{ total_medido|floatformat:0 }} /
+              R$ {{ contrato.valor_atual|floatformat:0 }})
+            </span>
+          </div>
+          <div class="progress-bar-custom">
+            <div class="progress-fill
+              {% if perc_exec < 75 %}green
+              {% elif perc_exec < 95 %}yellow
+              {% else %}red{% endif %}"
+              style="width:{% if perc_exec > 100 %}100{% else %}{{ perc_exec }}{% endif %}%">
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;
+                      font-size:11px;color:var(--gray-600);margin-top:6px;">
+            <span>Saldo disponível: R$ {{ contrato.saldo_disponivel|floatformat:0 }}</span>
+            <span>Total pago: R$ {{ total_pago|floatformat:0 }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Escopo contratado -->
+    <div class="card mb-3">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-list-ul"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          Escopo Contratado
+        </h6>
+        <a href="{% url 'contratos:item_criar' contrato.pk %}"
+          style="font-size:12px;color:var(--vale-blue);
+                  text-decoration:none;font-weight:600;">
+          <i class="bi bi-plus-lg"></i> Adicionar Item
+        </a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Descrição</th>
+              <th style="text-align:center;">Unid.</th>
+              <th style="text-align:right;">Qtd.</th>
+              <th style="text-align:right;">R$ Unit.</th>
+              <th style="text-align:right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in itens %}
+            <tr>
+              <td style="font-size:12.5px;">{{ item.descricao }}</td>
+              <td style="text-align:center;">{{ item.unidade }}</td>
+              <td style="text-align:right;">{{ item.quantidade }}</td>
+              <td style="text-align:right;">
+                R$ {{ item.preco_unitario|floatformat:2 }}
+              </td>
+              <td style="text-align:right;font-weight:600;">
+                R$ {{ item.valor_total|floatformat:2 }}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5"
+                  style="text-align:center;padding:24px;
+                        color:var(--gray-600);font-size:13px;">
+                Nenhum item de escopo cadastrado.
+                <a href="{% url 'contratos:item_criar' contrato.pk %}"
+                  style="color:var(--vale-blue);font-weight:600;">
+                  Adicionar agora
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+            {% if itens %}
+            <tr style="background:var(--vale-blue-light);">
+              <td colspan="4"
+                  style="text-align:right;font-weight:700;
+                        font-size:13px;color:var(--vale-blue);">
+                TOTAL DO ESCOPO
+              </td>
+              <td style="text-align:right;font-weight:700;color:var(--vale-blue);">
+                R$ {{ valor_escopo|floatformat:2 }}
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Aditivos -->
+    <div class="card mb-3">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-file-earmark-plus-fill"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          Aditivos Contratuais
+        </h6>
+        <a href="{% url 'contratos:aditivo_criar' contrato.pk %}"
+          style="font-size:12px;color:var(--vale-blue);
+                  text-decoration:none;font-weight:600;">
+          <i class="bi bi-plus-lg"></i> Novo Aditivo
+        </a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Nº</th>
+              <th>Tipo</th>
+              <th style="text-align:right;">Valor Acréscimo</th>
+              <th>Nova Data Término</th>
+              <th>Assinatura</th>
+              <th>Justificativa</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ad in aditivos %}
+            <tr>
+              <td style="font-weight:700;">{{ ad.numero }}º</td>
+              <td>
+                <span class="badge-info">{{ ad.get_tipo_display }}</span>
+              </td>
+              <td style="text-align:right;font-weight:600;
+                color:{% if ad.valor_acrescimo >= 0 %}var(--vale-green)
+                      {% else %}#dc2626{% endif %};">
+                R$ {{ ad.valor_acrescimo|floatformat:2 }}
+              </td>
+              <td>
+                {% if ad.nova_data_termino %}
+                  {{ ad.nova_data_termino|date:"d/m/Y" }}
+                {% else %}—{% endif %}
+              </td>
+              <td style="white-space:nowrap;">
+                {{ ad.data_assinatura|date:"d/m/Y" }}
+              </td>
+              <td style="max-width:200px;overflow:hidden;
+                        text-overflow:ellipsis;white-space:nowrap;
+                        font-size:12px;color:var(--gray-600);">
+                {{ ad.justificativa }}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6"
+                  style="text-align:center;padding:24px;
+                        color:var(--gray-600);font-size:13px;">
+                Nenhum aditivo registrado.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Coluna direita ────────────────────────────────────────── -->
+  <div class="col-lg-5">
+
+    <!-- Ações rápidas -->
+    <div class="card mb-3">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-lightning-fill"
+            style="color:#d97706;margin-right:8px;"></i>
+          Ações Rápidas
+        </h6>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+
+          <a href="{% url 'financeiro:dre' contrato.pk %}"
+            style="display:flex;align-items:center;gap:10px;
+                    padding:10px 14px;border-radius:8px;
+                    background:var(--vale-blue);color:#fff;
+                    text-decoration:none;font-size:13px;font-weight:600;">
+            <i class="bi bi-calculator-fill" style="font-size:16px;"></i>
+            Ver DRE Mensal Completo
+          </a>
+
+          <a href="{% url 'financeiro:medicao_criar' contrato.pk %}"
+            style="display:flex;align-items:center;gap:10px;
+                    padding:10px 14px;border-radius:8px;
+                    background:var(--vale-green);color:#fff;
+                    text-decoration:none;font-size:13px;font-weight:600;">
+            <i class="bi bi-receipt-cutoff" style="font-size:16px;"></i>
+            Nova Medição (BM)
+          </a>
+
+          <a href="{% url 'financeiro:gasto_criar' contrato.pk %}"
+            style="display:flex;align-items:center;gap:10px;
+                    padding:10px 14px;border-radius:8px;
+                    background:var(--gray-200);color:var(--gray-900);
+                    text-decoration:none;font-size:13px;font-weight:600;">
+            <i class="bi bi-cash-stack" style="font-size:16px;"></i>
+            Lançar Gasto Operacional
+          </a>
+
+          <a href="{% url 'mobilizacao:quadro' contrato.pk %}"
+            style="display:flex;align-items:center;gap:10px;
+                    padding:10px 14px;border-radius:8px;
+                    background:var(--gray-200);color:var(--gray-900);
+                    text-decoration:none;font-size:13px;font-weight:600;">
+            <i class="bi bi-people-fill" style="font-size:16px;"></i>
+            Gerenciar Quadro de Mobilização
+          </a>
+
+          <a href="{% url 'contratos:aditivo_criar' contrato.pk %}"
+            style="display:flex;align-items:center;gap:10px;
+                    padding:10px 14px;border-radius:8px;
+                    background:var(--gray-200);color:var(--gray-900);
+                    text-decoration:none;font-size:13px;font-weight:600;">
+            <i class="bi bi-file-earmark-plus-fill" style="font-size:16px;"></i>
+            Registrar Aditivo
+          </a>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Quadro de mobilização resumido -->
+    <div class="card mb-3">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-people-fill"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          Quadro de Mobilização
+        </h6>
+        <a href="{% url 'mobilizacao:quadro' contrato.pk %}"
+          style="font-size:12px;color:var(--vale-blue);
+                  text-decoration:none;font-weight:600;">
+          Ver completo <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+      <div class="card-body-custom" style="padding:0;">
+        {% for cargo in cargos %}
+        <div style="
+          padding:12px 20px;
+          border-bottom:1px solid var(--gray-200);
+          {% if cargo.situacao == 'critico' %}background:#fff5f5;
+          {% elif cargo.situacao == 'alerta' %}background:#fffbeb;{% endif %}">
+          <div style="display:flex;justify-content:space-between;
+                      align-items:center;">
+            <div>
+              <div style="font-size:13px;font-weight:600;
+                          display:flex;align-items:center;gap:6px;">
+                {{ cargo.funcao }}
+                {% if cargo.is_critico %}
+                <span class="badge-critico" style="font-size:10px;">CRÍTICO</span>
+                {% endif %}
+              </div>
+              <div style="font-size:11px;color:var(--gray-600);margin-top:2px;">
+                Mínimo: {{ cargo.quantidade_minima }}
+                &nbsp;·&nbsp; Ativo: {{ cargo.total_ativos }}
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:20px;font-weight:800;line-height:1;
+                color:{% if cargo.situacao == 'ok' %}var(--vale-green)
+                      {% elif cargo.situacao == 'critico' %}#dc2626
+                      {% else %}#d97706{% endif %};">
+                {{ cargo.total_ativos }}/{{ cargo.quantidade_minima }}
+              </div>
+              <div style="margin-top:4px;">
+                {% if cargo.situacao == 'ok' %}
+                  <span class="badge-ok">Regular</span>
+                {% elif cargo.situacao == 'critico' %}
+                  <span class="badge-critico">Déficit {{ cargo.deficit }}</span>
+                {% else %}
+                  <span class="badge-alerta">Déficit {{ cargo.deficit }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:24px;
+                    color:var(--gray-600);font-size:13px;">
+          <i class="bi bi-people"
+            style="font-size:24px;display:block;margin-bottom:6px;"></i>
+          Nenhum cargo obrigatório definido.
+          <br>
+          <a href="{% url 'mobilizacao:cargo_criar' contrato.pk %}"
+            style="color:var(--vale-blue);font-weight:600;">
+            Definir agora
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Gráfico gastos por categoria -->
+    {% if chart_categorias != "[]" %}
+    <div class="card mb-3">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-pie-chart-fill"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          Gastos por Categoria
+        </h6>
+        <a href="{% url 'financeiro:gastos_lista' contrato.pk %}"
+          style="font-size:12px;color:var(--vale-blue);
+                  text-decoration:none;font-weight:600;">
+          Ver todos
+        </a>
+      </div>
+      <div class="card-body-custom">
+        <canvas id="chartGastos" style="max-height:220px;"></canvas>
+        <div style="margin-top:12px;padding-top:12px;
+                    border-top:1px solid var(--gray-200);
+                    display:flex;justify-content:space-between;
+                    font-size:12px;">
+          <span style="color:var(--gray-600);">Total de Gastos</span>
+          <span style="font-weight:700;color:#dc2626;">
+            R$ {{ total_gastos|floatformat:0 }}
+          </span>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Últimas medições -->
+    <div class="card">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-receipt-cutoff"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          Últimas Medições
+        </h6>
+        <a href="{% url 'financeiro:dre' contrato.pk %}"
+          style="font-size:12px;color:var(--vale-blue);
+                  text-decoration:none;font-weight:600;">
+          <i class="bi bi-calculator-fill"></i> Ver DRE Completo
+        </a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>BM</th>
+              <th>Competência</th>
+              <th style="text-align:right;">Valor Líq.</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in medicoes %}
+            <tr>
+              <td style="font-weight:700;">
+                BM-{{ m.numero|stringformat:"03d" }}
+              </td>
+              <td style="white-space:nowrap;">
+                {{ m.competencia|date:"m/Y" }}
+              </td>
+              <td style="text-align:right;font-weight:600;">
+                R$ {{ m.valor_liquido|floatformat:0 }}
+              </td>
+              <td>
+                {% if m.status == 'paga' %}
+                  <span class="badge-ok">Paga</span>
+                {% elif m.status == 'aprovada' %}
+                  <span class="badge-info">Aprovada</span>
+                {% elif m.status == 'glosada' %}
+                  <span class="badge-alerta">Com Glosa</span>
+                {% elif m.status == 'rejeitada' %}
+                  <span class="badge-critico">Rejeitada</span>
+                {% elif m.status == 'nf_emitida' %}
+                  <span class="badge-info">NF Emitida</span>
+                {% else %}
+                  <span style="color:var(--gray-600);font-size:12px;">
+                    {{ m.get_status_display }}
+                  </span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4"
+                  style="text-align:center;padding:24px;
+                        color:var(--gray-600);font-size:13px;">
+                <i class="bi bi-receipt"
+                  style="font-size:24px;display:block;margin-bottom:6px;"></i>
+                Nenhuma medição lançada ainda.
+                <br>
+                <a href="{% url 'financeiro:medicao_criar' contrato.pk %}"
+                  style="color:var(--vale-blue);font-weight:600;">
+                  Criar primeira medição
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if medicoes %}
+      <div style="padding:12px 20px;border-top:1px solid var(--gray-200);
+                  display:flex;justify-content:space-between;
+                  font-size:12px;color:var(--gray-600);">
+        <span>Total faturado acumulado</span>
+        <span style="font-weight:700;color:var(--vale-green);">
+          R$ {{ total_medido|floatformat:0 }}
+        </span>
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+  .det-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+</style>
+
+{% endblock %}
+
+
+{% block extra_js %}
+{% if chart_categorias != "[]" %}
+<script>
+const catLabels  = {{ chart_categorias|safe }};
+const catValores = {{ chart_valores|safe }};
+
+new Chart(document.getElementById('chartGastos'), {
+  type: 'doughnut',
+  data: {
+    labels: catLabels,
+    datasets: [{
+      data: catValores,
+      backgroundColor: [
+        '#003087', '#00703c', '#0057b8',
+        '#d97706', '#7c3aed', '#dc2626'
+      ],
+      borderWidth: 2,
+      borderColor: '#fff',
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          font: { family: 'Inter', size: 11 },
+          padding: 12,
+          boxWidth: 12,
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx =>
+            ' R$ ' + ctx.parsed.toLocaleString('pt-BR',
+              { minimumFractionDigits: 0 })
+        }
+      }
+    },
+    cutout: '65%',
+  }
+});
+</script>
+{% endif %}
+{% endblock %}

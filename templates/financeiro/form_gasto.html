@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div style="max-width:780px;">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="card">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-cash-stack"
+            style="color:var(--vale-green);margin-right:8px;"></i>
+          Contrato:
+          <span style="color:var(--vale-blue);">{{ contrato.numero_sap }}</span>
+          &nbsp;·&nbsp;
+          <span style="color:var(--gray-600);font-weight:400;">
+            {{ contrato.empresa.razao_social }}
+          </span>
+        </h6>
+      </div>
+      <div class="card-body-custom">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.competencia.label }}</label>
+            {{ form.competencia }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.categoria.label }}</label>
+            {{ form.categoria }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.subcategoria.label }}</label>
+            {{ form.subcategoria }}
+          </div>
+          <div class="col-12">
+            <label class="form-label-custom">{{ form.descricao.label }}</label>
+            {{ form.descricao }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">{{ form.fornecedor.label }}</label>
+            {{ form.fornecedor }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">
+              {{ form.numero_nf_fornecedor.label }}
+            </label>
+            {{ form.numero_nf_fornecedor }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.valor.label }}</label>
+            {{ form.valor }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.tipo.label }}</label>
+            {{ form.tipo }}
+            <div style="font-size:11px;color:var(--gray-600);margin-top:4px;">
+              Provisionado = previsto mas não confirmado.
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.data_lancamento.label }}</label>
+            {{ form.data_lancamento }}
+          </div>
+          <div class="col-12">
+            <label class="form-label-custom">{{ form.comprovante.label }}</label>
+            {{ form.comprovante }}
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:20px;">
+          <button type="submit"
+                  style="background:var(--vale-green);color:#fff;border:none;
+                        padding:10px 22px;border-radius:8px;font-size:13px;
+                        font-weight:600;cursor:pointer;">
+            <i class="bi bi-check-lg"></i> Lançar Gasto
+          </button>
+          <a href="{% url 'financeiro:dre' contrato.pk %}"
+            style="background:var(--gray-200);color:var(--gray-900);
+                    padding:10px 16px;border-radius:8px;font-size:13px;
+                    font-weight:600;text-decoration:none;">
+            Cancelar
+          </a>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<style>
+  .form-label-custom {
+    font-size:12px; font-weight:600; color:var(--gray-600);
+    text-transform:uppercase; letter-spacing:.4px;
+    display:block; margin-bottom:5px;
+  }
+</style>
+{% endblock %}

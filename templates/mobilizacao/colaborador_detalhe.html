@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% block title %}{{ colab.nome_completo }} — Vale{% endblock %}
+{% block page_title %}{{ colab.nome_completo }}{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+  {% for msg in messages %}
+  <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;
+              padding:12px 16px;border-radius:8px;margin-bottom:16px;
+              display:flex;align-items:center;gap:8px;font-size:13px;">
+    <i class="bi bi-check-circle-fill"></i> {{ msg }}
+  </div>
+  {% endfor %}
+{% endif %}
+
+<div class="row g-3">
+
+  <!-- Dados do colaborador -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-person-badge-fill"
+             style="color:var(--vale-blue);margin-right:8px;"></i>
+          Dados do Colaborador
+        </h6>
+        <a href="{% url 'mobilizacao:colaborador_editar' colab.pk %}"
+           style="font-size:12px;color:var(--vale-blue);
+                  text-decoration:none;font-weight:600;">
+          <i class="bi bi-pencil-fill"></i> Editar
+        </a>
+      </div>
+      <div class="card-body-custom" style="font-size:13px;">
+
+        <div style="text-align:center;padding:16px 0 20px;">
+          <div style="width:64px;height:64px;background:var(--vale-blue);
+                      border-radius:50%;display:flex;align-items:center;
+                      justify-content:center;margin:0 auto 10px;
+                      font-size:24px;font-weight:700;color:#fff;">
+            {{ colab.nome_completo|first|upper }}
+          </div>
+          <div style="font-size:16px;font-weight:700;">
+            {{ colab.nome_completo }}
+          </div>
+          <div style="margin-top:6px;">
+            {% if colab.status == 'mobilizado' %}
+              <span class="badge-ok">Ativo</span>
+            {% elif colab.status == 'afastado' %}
+              <span class="badge-alerta">Afastado</span>
+            {% elif colab.status == 'ferias' %}
+              <span class="badge-info">Férias</span>
+            {% elif colab.status == 'desmobilizado' %}
+              <span style="background:#f1f5f9;color:#64748b;font-size:11px;
+                           font-weight:600;padding:3px 8px;border-radius:20px;">
+                Desmobilizado
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
+        {% for label, valor in forloop.parentloop|dictsort:"0" %}{% endfor %}
+
+        <div class="detalhe-row">
+          <span class="detalhe-label">CPF</span>
+          <span style="font-family:monospace;">{{ colab.cpf }}</span>
+        </div>
+        {% if colab.matricula_empresa %}
+        <div class="detalhe-row">
+          <span class="detalhe-label">Matrícula</span>
+          <span>{{ colab.matricula_empresa }}</span>
+        </div>
+        {% endif %}
+        <div class="detalhe-row">
+          <span class="detalhe-label">Função</span>
+          <span style="font-weight:600;">{{ colab.funcao }}</span>
+        </div>
+        <div class="detalhe-row">
+          <span class="detalhe-label">Cargo Obrig.</span>
+          <span>{{ colab.cargo_obrigatorio.funcao|default:"—" }}</span>
+        </div>
+        <div class="detalhe-row">
+          <span class="detalhe-label">Contrato</span>
+          <a href="{% url 'contratos:detalhe' colab.contrato.pk %}"
+             style="color:var(--vale-blue);text-decoration:none;font-weight:600;">
+            {{ colab.contrato.numero_sap }}
+          </a>
+        </div>
+        <div class="detalhe-row">
+          <span class="detalhe-label">Mobilizado em</span>
+          <span>{{ colab.data_mobilizacao|date:"d/m/Y" }}</span>
+        </div>
+        {% if colab.data_desmobilizacao %}
+        <div class="detalhe-row">
+          <span class="detalhe-label">Desmobilizado em</span>
+          <span>{{ colab.data_desmobilizacao|date:"d/m/Y" }}</span>
+        </div>
+        {% endif %}
+        {% if colab.observacao %}
+        <div style="margin-top:12px;padding-top:12px;
+                    border-top:1px solid var(--gray-200);">
+          <div class="detalhe-label">Observação</div>
+          <div style="margin-top:4px;color:var(--gray-600);line-height:1.5;">
+            {{ colab.observacao }}
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Habilitações -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-patch-check-fill"
+             style="color:var(--vale-blue);margin-right:8px;"></i>
+          Habilitações e Certificações
+        </h6>
+        <a href="{% url 'mobilizacao:habilitacao_criar' colab.pk %}"
+           style="font-size:12px;color:var(--vale-blue);
+                  text-decoration:none;font-weight:600;">
+          <i class="bi bi-plus-lg"></i> Nova Habilitação
+        </a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Habilitação</th>
+              <th>Nº Registro</th>
+              <th>Emissão</th>
+              <th>Validade</th>
+              <th>Situação</th>
+              <th>Doc.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for h in habilitacoes %}
+            <tr {% if h.esta_vencida %}style="background:#fff5f5;"
+                {% elif h.vence_em_breve %}style="background:#fffbeb;"{% endif %}>
+              <td style="font-weight:600;">{{ h.descricao }}</td>
+              <td style="font-family:monospace;font-size:12.5px;">
+                {{ h.numero_registro|default:"—" }}
+              </td>
+              <td style="white-space:nowrap;">
+                {{ h.data_emissao|date:"d/m/Y"|default:"—" }}
+              </td>
+              <td style="white-space:nowrap;font-weight:600;
+                color:{% if h.esta_vencida %}#dc2626
+                      {% elif h.vence_em_breve %}#d97706
+                      {% else %}var(--gray-900){% endif %};">
+                {{ h.data_validade|date:"d/m/Y"|default:"Sem vencimento" }}
+              </td>
+              <td>
+                {% if h.esta_vencida %}
+                  <span class="badge-critico">Vencida</span>
+                {% elif h.vence_em_breve %}
+                  <span class="badge-alerta">Vence em breve</span>
+                {% else %}
+                  <span class="badge-ok">Válida</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if h.documento %}
+                <a href="{{ h.documento.url }}"
+                   target="_blank"
+                   style="color:var(--vale-blue);font-size:15px;"
+                   title="Ver documento">
+                  <i class="bi bi-file-earmark-pdf-fill"></i>
+                </a>
+                {% else %}
+                <span style="color:var(--gray-400);font-size:13px;">—</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6"
+                  style="text-align:center;padding:32px;
+                         color:var(--gray-600);font-size:13px;">
+                <i class="bi bi-patch-check"
+                   style="font-size:28px;display:block;margin-bottom:8px;"></i>
+                Nenhuma habilitação registrada.
+                <br>
+                <a href="{% url 'mobilizacao:habilitacao_criar' colab.pk %}"
+                   style="color:var(--vale-blue);font-weight:600;">
+                  Adicionar habilitação
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .detalhe-row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid var(--gray-200);
+    font-size: 13px;
+  }
+  .detalhe-label {
+    font-size: 11px; font-weight: 600;
+    color: var(--gray-600);
+    text-transform: uppercase; letter-spacing: .4px;
+  }
+</style>
+
+{% endblock %}

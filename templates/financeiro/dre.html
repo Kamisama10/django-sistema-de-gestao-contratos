@@ -1,0 +1,564 @@
+{% extends 'base.html' %}
+{% block title %}DRE — {{ contrato.numero_sap }}{% endblock %}
+{% block page_title %}
+  DRE Mensal
+  <span style="color:var(--gray-600);font-weight:400;font-size:14px;">
+    — {{ contrato.numero_sap }}
+  </span>
+{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+  {% for msg in messages %}
+  <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;
+              padding:12px 16px;border-radius:8px;margin-bottom:16px;
+              display:flex;align-items:center;gap:8px;font-size:13px;">
+    <i class="bi bi-check-circle-fill"></i> {{ msg }}
+  </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Cabeçalho -->
+<div class="card mb-4">
+  <div class="card-body-custom">
+    <div style="display:flex;justify-content:space-between;
+                align-items:center;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--gray-600);
+                    text-transform:uppercase;letter-spacing:.4px;">
+          Contrato
+        </div>
+        <div style="font-size:18px;font-weight:700;color:var(--vale-blue);">
+          {{ contrato.numero_sap }}
+        </div>
+        <div style="font-size:13px;color:var(--gray-600);margin-top:2px;">
+          {{ contrato.empresa.razao_social }}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="{% url 'financeiro:medicao_criar' contrato.pk %}"
+           style="display:inline-flex;align-items:center;gap:6px;
+                  background:var(--vale-blue);color:#fff;padding:8px 16px;
+                  border-radius:8px;text-decoration:none;
+                  font-size:13px;font-weight:600;">
+          <i class="bi bi-plus-lg"></i> Nova Medição
+        </a>
+        <a href="{% url 'financeiro:gasto_criar' contrato.pk %}"
+           style="display:inline-flex;align-items:center;gap:6px;
+                  background:var(--vale-green);color:#fff;padding:8px 16px;
+                  border-radius:8px;text-decoration:none;
+                  font-size:13px;font-weight:600;">
+          <i class="bi bi-plus-lg"></i> Lançar Gasto
+        </a>
+        <a href="{% url 'financeiro:gastos_lista' contrato.pk %}"
+           style="display:inline-flex;align-items:center;gap:6px;
+                  background:var(--gray-200);color:var(--gray-900);padding:8px 14px;
+                  border-radius:8px;text-decoration:none;
+                  font-size:13px;font-weight:600;">
+          <i class="bi bi-list-ul"></i> Ver Gastos
+        </a>
+        <a href="{% url 'contratos:detalhe' contrato.pk %}"
+           style="display:inline-flex;align-items:center;gap:6px;
+                  background:var(--gray-200);color:var(--gray-900);padding:8px 14px;
+                  border-radius:8px;text-decoration:none;
+                  font-size:13px;font-weight:600;">
+          <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+        <a href="{% url 'financeiro:dre_pdf' contrato.pk %}?mes={{ mes_param }}"
+           style="display:inline-flex;align-items:center;gap:6px;
+                  background:#dc2626;color:#fff;padding:8px 14px;
+                  border-radius:8px;text-decoration:none;
+                  font-size:13px;font-weight:600;">
+          <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+        </a>
+        <a href="{% url 'financeiro:dre_excel' contrato.pk %}?mes={{ mes_param }}"
+           style="display:inline-flex;align-items:center;gap:6px;
+                  background:#00703c;color:#fff;padding:8px 14px;
+                  border-radius:8px;text-decoration:none;
+                  font-size:13px;font-weight:600;">
+          <i class="bi bi-file-earmark-excel-fill"></i> Excel
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Seletor de mês -->
+<div class="card mb-4">
+  <div class="card-body-custom">
+    <form method="get"
+          style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--gray-600);
+                      text-transform:uppercase;letter-spacing:.4px;
+                      display:block;margin-bottom:5px;">
+          Competência
+        </label>
+        <input type="month" name="mes" value="{{ mes_param }}"
+               class="form-control" style="font-size:13px;width:180px;">
+      </div>
+      <button type="submit"
+              style="background:var(--vale-blue);color:#fff;border:none;
+                     padding:9px 16px;border-radius:8px;font-size:13px;
+                     font-weight:600;cursor:pointer;">
+        <i class="bi bi-funnel-fill"></i> Aplicar
+      </button>
+      {% if todos_meses %}
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:12px;color:var(--gray-600);">Atalhos:</span>
+        {% for m in todos_meses|slice:":6" %}
+        <a href="?mes={{ m|date:'Y-m' }}"
+           style="font-size:12px;padding:4px 10px;border-radius:20px;
+                  text-decoration:none;
+                  {% if m|date:'Y-m' == mes_param %}
+                    background:var(--vale-blue);color:#fff;
+                  {% else %}
+                    background:var(--gray-200);color:var(--gray-900);
+                  {% endif %}">
+          {{ m|date:"m/Y" }}
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+<!-- KPIs acumulados -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon blue"><i class="bi bi-graph-up"></i></div>
+      <div>
+        <div class="kpi-label">Fat. Acumulado</div>
+        <div class="kpi-value" style="font-size:17px;">
+          R$ {{ fat_acumulado|floatformat:0 }}
+        </div>
+        <div class="kpi-sub">Total medido aprovado</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon red"><i class="bi bi-cash-stack"></i></div>
+      <div>
+        <div class="kpi-label">Gastos Acumulados</div>
+        <div class="kpi-value" style="font-size:17px;">
+          R$ {{ gastos_acumulado|floatformat:0 }}
+        </div>
+        <div class="kpi-sub">Total realizado</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon
+        {% if margem_acumulada_pct >= 10 %}green
+        {% elif margem_acumulada_pct >= 0 %}yellow
+        {% else %}red{% endif %}">
+        <i class="bi bi-arrow-up-right-circle"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Margem Acumulada</div>
+        <div class="kpi-value" style="font-size:17px;
+          color:{% if margem_acumulada_pct >= 10 %}var(--vale-green)
+                {% elif margem_acumulada_pct >= 0 %}#d97706
+                {% else %}#dc2626{% endif %};">
+          {{ margem_acumulada_pct }}%
+        </div>
+        <div class="kpi-sub">R$ {{ margem_acumulada|floatformat:0 }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon purple"><i class="bi bi-wallet2"></i></div>
+      <div>
+        <div class="kpi-label">Saldo Disponível</div>
+        <div class="kpi-value" style="font-size:17px;">
+          R$ {{ contrato.saldo_disponivel|floatformat:0 }}
+        </div>
+        <div class="kpi-sub">{{ contrato.percentual_executado }}% executado</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+
+  <!-- DRE do mês -->
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-calculator-fill"
+             style="color:var(--vale-blue);margin-right:8px;"></i>
+          DRE — {{ mes_sel|date:"m/Y" }}
+        </h6>
+      </div>
+      <div class="card-body-custom">
+
+        <!-- Faturamento -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;font-weight:700;color:var(--vale-blue);
+                      text-transform:uppercase;letter-spacing:.5px;
+                      margin-bottom:8px;">
+            Faturamento
+          </div>
+          <div class="dre-row">
+            <span>(+) Valor Medido Bruto</span>
+            <span style="color:var(--vale-green);font-weight:600;">
+              R$ {{ fat_bruto|floatformat:2 }}
+            </span>
+          </div>
+          {% if fat_glosa > 0 %}
+          <div class="dre-row">
+            <span>(-) Glosas</span>
+            <span style="color:#dc2626;">
+              R$ {{ fat_glosa|floatformat:2 }}
+            </span>
+          </div>
+          {% endif %}
+          {% if fat_retencao > 0 %}
+          <div class="dre-row">
+            <span>(-) Retenções</span>
+            <span style="color:#dc2626;">
+              R$ {{ fat_retencao|floatformat:2 }}
+            </span>
+          </div>
+          {% endif %}
+          <div class="dre-row dre-subtotal">
+            <span style="font-weight:700;">(=) Faturamento Líquido</span>
+            <span style="color:var(--vale-green);font-weight:700;">
+              R$ {{ fat_liquido|floatformat:2 }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Gastos -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;font-weight:700;color:#dc2626;
+                      text-transform:uppercase;letter-spacing:.5px;
+                      margin-bottom:8px;">
+            Gastos Operacionais
+          </div>
+          {% for cat, valor in gastos_por_categoria.items %}
+          <div class="dre-row">
+            <span>(-) {{ cat }}</span>
+            <span style="color:#dc2626;">
+              R$ {{ valor|floatformat:2 }}
+            </span>
+          </div>
+          {% empty %}
+          <div style="font-size:12px;color:var(--gray-600);padding:8px 0;">
+            Nenhum gasto lançado neste mês.
+          </div>
+          {% endfor %}
+          <div class="dre-row dre-subtotal">
+            <span style="font-weight:700;">(=) Total de Gastos</span>
+            <span style="color:#dc2626;font-weight:700;">
+              R$ {{ total_gastos|floatformat:2 }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Resultado -->
+        <div style="background:
+          {% if margem_pct >= 10 %}var(--vale-green-light)
+          {% elif margem_pct >= 0 %}#fffbeb
+          {% else %}#fff5f5{% endif %};
+          border-radius:10px;padding:16px;margin-top:8px;">
+          <div style="display:flex;justify-content:space-between;
+                      align-items:center;">
+            <div>
+              <div style="font-size:12px;font-weight:600;
+                          color:var(--gray-600);text-transform:uppercase;">
+                Margem Bruta
+              </div>
+              <div style="font-size:26px;font-weight:800;
+                color:{% if margem_pct >= 10 %}var(--vale-green)
+                      {% elif margem_pct >= 0 %}#d97706
+                      {% else %}#dc2626{% endif %};">
+                {{ margem_pct }}%
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:20px;font-weight:700;
+                color:{% if margem >= 0 %}var(--vale-green)
+                      {% else %}#dc2626{% endif %};">
+                R$ {{ margem|floatformat:2 }}
+              </div>
+              <div style="font-size:11px;color:var(--gray-600);margin-top:2px;">
+                Faturamento - Gastos
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico pizza categorias -->
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-pie-chart-fill"
+             style="color:var(--vale-blue);margin-right:8px;"></i>
+          Composição dos Gastos — {{ mes_sel|date:"m/Y" }}
+        </h6>
+      </div>
+      <div class="card-body-custom"
+           style="display:flex;align-items:center;justify-content:center;">
+        {% if chart_cat_labels != "[]" %}
+        <canvas id="chartCategorias" style="max-height:280px;"></canvas>
+        {% else %}
+        <div style="text-align:center;padding:48px;color:var(--gray-600);">
+          <i class="bi bi-pie-chart"
+             style="font-size:40px;display:block;margin-bottom:10px;"></i>
+          <p style="font-size:13px;">
+            Nenhum gasto lançado neste mês.
+            <br>
+            <a href="{% url 'financeiro:gasto_criar' contrato.pk %}"
+               style="color:var(--vale-blue);font-weight:600;">
+              Lançar primeiro gasto
+            </a>
+          </p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Gráfico evolução 6 meses -->
+<div class="card mb-4">
+  <div class="card-header-custom">
+    <h6>
+      <i class="bi bi-bar-chart-line-fill"
+         style="color:var(--vale-blue);margin-right:8px;"></i>
+      Evolução — Faturamento × Gastos × Margem (6 meses)
+    </h6>
+  </div>
+  <div class="card-body-custom">
+    <canvas id="chartEvolucao" style="max-height:300px;"></canvas>
+  </div>
+</div>
+
+<!-- Tabela de medições do mês -->
+<div class="card mb-4">
+  <div class="card-header-custom">
+    <h6>
+      <i class="bi bi-receipt-cutoff"
+         style="color:var(--vale-blue);margin-right:8px;"></i>
+      Medições — {{ mes_sel|date:"m/Y" }}
+    </h6>
+    <a href="{% url 'financeiro:medicao_criar' contrato.pk %}"
+       style="font-size:12px;color:var(--vale-blue);
+              text-decoration:none;font-weight:600;">
+      <i class="bi bi-plus-lg"></i> Nova Medição
+    </a>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>BM</th>
+          <th>Valor Bruto</th>
+          <th>Glosa</th>
+          <th>Retenção</th>
+          <th>Valor Líquido</th>
+          <th>NF</th>
+          <th>Pagamento</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in medicoes %}
+        <tr>
+          <td style="font-weight:700;">BM-{{ m.numero|stringformat:"03d" }}</td>
+          <td>R$ {{ m.valor_bruto|floatformat:2 }}</td>
+          <td style="color:{% if m.valor_glosa > 0 %}#dc2626{% else %}var(--gray-400){% endif %};">
+            R$ {{ m.valor_glosa|floatformat:2 }}
+          </td>
+          <td style="color:var(--gray-600);">
+            R$ {{ m.valor_retencao|floatformat:2 }}
+          </td>
+          <td style="font-weight:700;color:var(--vale-green);">
+            R$ {{ m.valor_liquido|floatformat:2 }}
+          </td>
+          <td style="font-size:12px;">{{ m.numero_nf|default:"—" }}</td>
+          <td style="white-space:nowrap;font-size:12.5px;">
+            {% if m.data_pagamento %}
+              <span style="color:var(--vale-green);">
+                {{ m.data_pagamento|date:"d/m/Y" }}
+              </span>
+            {% elif m.data_previsao_pagamento %}
+              Prev: {{ m.data_previsao_pagamento|date:"d/m/Y" }}
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if m.status == 'paga' %}
+              <span class="badge-ok">Paga</span>
+            {% elif m.status == 'aprovada' %}
+              <span class="badge-info">Aprovada</span>
+            {% elif m.status == 'glosada' %}
+              <span class="badge-alerta">Com Glosa</span>
+            {% elif m.status == 'rejeitada' %}
+              <span class="badge-critico">Rejeitada</span>
+            {% elif m.status == 'nf_emitida' %}
+              <span class="badge-info">NF Emitida</span>
+            {% else %}
+              <span style="font-size:12px;color:var(--gray-600);">
+                {{ m.get_status_display }}
+              </span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'financeiro:medicao_editar' m.pk %}"
+               style="color:var(--gray-600);font-size:15px;" title="Editar">
+              <i class="bi bi-pencil-fill"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9"
+              style="text-align:center;padding:32px;
+                     color:var(--gray-600);font-size:13px;">
+            Nenhuma medição neste mês.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .dre-row {
+    display: flex; justify-content: space-between;
+    padding: 7px 0; border-bottom: 1px solid var(--gray-200);
+    font-size: 13px;
+  }
+  .dre-subtotal {
+    padding-top: 10px; margin-top: 4px;
+    border-bottom: 2px solid var(--gray-200) !important;
+    border-top: 1px solid var(--gray-200);
+  }
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const labels    = {{ chart_labels|safe }};
+const fatData   = {{ chart_fat|safe }};
+const gastoData = {{ chart_gastos|safe }};
+const margData  = {{ chart_margem|safe }};
+
+new Chart(document.getElementById('chartEvolucao'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [
+      {
+        label: 'Faturamento',
+        data: fatData,
+        backgroundColor: 'rgba(0,48,135,0.82)',
+        borderRadius: 5,
+        borderSkipped: false,
+        yAxisID: 'y',
+      },
+      {
+        label: 'Gastos',
+        data: gastoData,
+        backgroundColor: 'rgba(220,38,38,0.72)',
+        borderRadius: 5,
+        borderSkipped: false,
+        yAxisID: 'y',
+      },
+      {
+        label: 'Margem',
+        data: margData,
+        type: 'line',
+        borderColor: '#00703c',
+        backgroundColor: 'rgba(0,112,60,0.1)',
+        borderWidth: 2,
+        pointRadius: 4,
+        pointBackgroundColor: '#00703c',
+        fill: true,
+        tension: 0.3,
+        yAxisID: 'y',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: { font: { family: 'Inter', size: 12 }, padding: 16 }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx =>
+            ' R$ ' + ctx.parsed.y.toLocaleString('pt-BR',
+              { minimumFractionDigits: 0 })
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { font: { family: 'Inter', size: 12 } }
+      },
+      y: {
+        grid: { color: 'rgba(0,0,0,.05)' },
+        ticks: {
+          font: { family: 'Inter', size: 11 },
+          callback: v => 'R$ ' + (v / 1000).toFixed(0) + 'k'
+        }
+      }
+    }
+  }
+});
+
+{% if chart_cat_labels != "[]" %}
+new Chart(document.getElementById('chartCategorias'), {
+  type: 'doughnut',
+  data: {
+    labels: {{ chart_cat_labels|safe }},
+    datasets: [{
+      data: {{ chart_cat_valores|safe }},
+      backgroundColor: [
+        '#003087','#dc2626','#00703c',
+        '#d97706','#7c3aed','#0891b2'
+      ],
+      borderWidth: 2,
+      borderColor: '#fff',
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'right',
+        labels: { font: { family: 'Inter', size: 12 }, padding: 14 }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx =>
+            ' R$ ' + ctx.parsed.toLocaleString('pt-BR')
+        }
+      }
+    }
+  }
+});
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,516 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — Vale Contratos{% endblock %}
+{% block page_title %}
+  Dashboard
+  <span style="color:var(--gray-600);font-weight:400;font-size:14px;">— Visão Geral</span>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Alertas críticos no topo ────────────────────────────── -->
+{% if alertas_criticos %}
+<div style="margin-bottom:24px;">
+  {% for cargo in alertas_criticos %}
+  <div class="alert-panel critico">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <div>
+      <div class="alert-panel-title">
+        CRÍTICO — Déficit de "{{ cargo.funcao }}" no contrato {{ cargo.contrato.numero_sap }}
+      </div>
+      <div class="alert-panel-sub">
+        Exigido: {{ cargo.quantidade_minima }} &nbsp;·&nbsp;
+        Mobilizados: {{ cargo.total_ativos }} &nbsp;·&nbsp;
+        Déficit: {{ cargo.deficit }} &nbsp;·&nbsp;
+        Empresa: {{ cargo.contrato.empresa.razao_social }}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ── KPI Cards ───────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon blue">
+        <i class="bi bi-file-earmark-text-fill"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Contratos Vigentes</div>
+        <div class="kpi-value">{{ total_vigentes }}</div>
+        <div class="kpi-sub">{{ total_aprovacao }} em aprovação</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon green">
+        <i class="bi bi-currency-dollar"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Carteira de Contratos</div>
+        <div class="kpi-value" style="font-size:18px;">
+          R$ {{ valor_total_carteira|floatformat:0 }}
+        </div>
+        <div class="kpi-sub">Valor atual total vigentes</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon purple">
+        <i class="bi bi-hourglass-split"></i>
+      </div>
+      <div>
+        <div class="kpi-label">A Receber</div>
+        <div class="kpi-value" style="font-size:18px;">
+          R$ {{ valor_a_receber|floatformat:0 }}
+        </div>
+        <div class="kpi-sub">{{ medicoes_pendentes|length }} medições pendentes</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon
+        {% if margem_pct >= 10 %}green
+        {% elif margem_pct >= 0 %}yellow
+        {% else %}red{% endif %}">
+        <i class="bi bi-graph-up-arrow"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Margem — Mês Atual</div>
+        <div class="kpi-value" style="font-size:18px;
+          color:{% if margem_pct >= 10 %}var(--vale-green)
+                {% elif margem_pct >= 0 %}#d97706
+                {% else %}#dc2626{% endif %};">
+          {{ margem_pct }}%
+        </div>
+        <div class="kpi-sub">R$ {{ margem_mes|floatformat:0 }}</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── DRE do mês + Alertas ────────────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <!-- DRE resumido -->
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-calculator-fill"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          DRE — Mês Atual
+        </h6>
+        <span class="badge-info">{{ hoje|date:"m/Y" }}</span>
+      </div>
+      <div class="card-body-custom">
+
+        <div style="display:flex;justify-content:space-between;
+                    padding:10px 0;border-bottom:1px solid var(--gray-200);">
+          <span style="font-size:13px;color:var(--gray-600);">
+            (+) Faturamento Bruto
+          </span>
+          <span style="font-size:13px;font-weight:600;color:var(--vale-green);">
+            R$ {{ fat_mes|floatformat:0 }}
+          </span>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;
+                    padding:10px 0;border-bottom:1px solid var(--gray-200);">
+          <span style="font-size:13px;color:var(--gray-600);">
+            (-) Gastos Operacionais
+          </span>
+          <span style="font-size:13px;font-weight:600;color:#dc2626;">
+            R$ {{ gastos_mes|floatformat:0 }}
+          </span>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;
+                    padding:14px 0 4px;align-items:center;">
+          <span style="font-size:14px;font-weight:700;">
+            (=) Margem Bruta
+          </span>
+          <div style="text-align:right;">
+            <div style="font-size:18px;font-weight:700;
+              color:{% if margem_pct >= 0 %}var(--vale-green){% else %}#dc2626{% endif %};">
+              R$ {{ margem_mes|floatformat:0 }}
+            </div>
+            <div style="font-size:12px;color:var(--gray-600);">
+              {{ margem_pct }}% sobre faturamento
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:11px;color:var(--gray-600);">
+              Relação Gastos / Faturamento
+            </span>
+            <span style="font-size:11px;font-weight:600;">
+              {% if fat_mes > 0 %}
+                {{ gastos_mes|floatformat:0 }} / {{ fat_mes|floatformat:0 }}
+              {% else %}—{% endif %}
+            </span>
+          </div>
+          <div class="progress-bar-custom">
+            {% if fat_mes > 0 %}
+            {% widthratio gastos_mes fat_mes 100 as pct_gastos %}
+            <div class="progress-fill
+              {% if pct_gastos < 85 %}green
+              {% elif pct_gastos < 100 %}yellow
+              {% else %}red{% endif %}"
+              style="width:{% if pct_gastos > 100 %}100{% else %}{{ pct_gastos }}{% endif %}%">
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Alertas de vencimento e mobilização -->
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-bell-fill"
+            style="color:#d97706;margin-right:8px;"></i>
+          Alertas Ativos
+        </h6>
+        <span class="badge-alerta">
+          {{ alertas_criticos|length|add:alertas_normais|length|add:em_60_dias|length }}
+          alertas
+        </span>
+      </div>
+      <div class="card-body-custom"
+          style="max-height:260px;overflow-y:auto;">
+
+        {% for cargo in alertas_criticos %}
+        <div class="alert-panel critico">
+          <i class="bi bi-person-x-fill"></i>
+          <div>
+            <div class="alert-panel-title">
+              Quadro Crítico — {{ cargo.funcao }}
+            </div>
+            <div class="alert-panel-sub">
+              {{ cargo.contrato.numero_sap }} &nbsp;·&nbsp;
+              Déficit: {{ cargo.deficit }} pessoa(s)
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+        {% for cargo in alertas_normais %}
+        <div class="alert-panel alerta">
+          <i class="bi bi-person-dash-fill"></i>
+          <div>
+            <div class="alert-panel-title">
+              Déficit de Quadro — {{ cargo.funcao }}
+            </div>
+            <div class="alert-panel-sub">
+              {{ cargo.contrato.numero_sap }} &nbsp;·&nbsp;
+              Déficit: {{ cargo.deficit }} pessoa(s)
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+        {% for c in em_60_dias %}
+        <div class="alert-panel alerta">
+          <i class="bi bi-calendar-x-fill"></i>
+          <div>
+            <div class="alert-panel-title">
+              Contrato Vencendo — {{ c.numero_sap }}
+            </div>
+            <div class="alert-panel-sub">
+              {{ c.empresa.razao_social }} &nbsp;·&nbsp;
+              Vence em {{ c.data_termino_atual|timeuntil }}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+        {% if not alertas_criticos and not alertas_normais and not em_60_dias %}
+        <div style="text-align:center;padding:32px 0;color:var(--gray-600);">
+          <i class="bi bi-check-circle-fill"
+            style="font-size:32px;color:var(--vale-green);"></i>
+          <p style="margin-top:8px;font-size:13px;">
+            Nenhum alerta ativo no momento.
+          </p>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Gráfico faturamento x gastos ───────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-bar-chart-line-fill"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          Faturamento × Gastos — Últimos 6 Meses
+        </h6>
+      </div>
+      <div class="card-body-custom">
+        <canvas id="chartFatGastos" style="max-height:280px;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tabela de contratos vigentes ───────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-table"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          Contratos Vigentes
+        </h6>
+        <span class="badge-info">{{ total_vigentes }} ativos</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Nº SAP</th>
+              <th>Empresa</th>
+              <th>Área</th>
+              <th>Valor Atual</th>
+              <th>Faturado</th>
+              <th>Gastos</th>
+              <th>Margem</th>
+              <th>Vencimento</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in contratos_tabela %}
+            <tr>
+              <td>
+                <a href="{% url 'contratos:detalhe' item.contrato.pk %}"
+                  style="font-weight:600;color:var(--vale-blue);
+                          text-decoration:none;">
+                  {{ item.contrato.numero_sap }}
+                </a>
+                {% if item.tem_alerta %}
+                <i class="bi bi-exclamation-triangle-fill"
+                  style="color:#dc2626;margin-left:4px;"
+                  title="Alerta de quadro"></i>
+                {% endif %}
+              </td>
+              <td style="max-width:180px;overflow:hidden;
+                        text-overflow:ellipsis;white-space:nowrap;">
+                {{ item.contrato.empresa.razao_social }}
+              </td>
+              <td>
+                <span class="badge-info">
+                  {{ item.contrato.get_area_display }}
+                </span>
+              </td>
+              <td style="font-weight:500;">
+                R$ {{ item.contrato.valor_atual|floatformat:0 }}
+              </td>
+              <td>R$ {{ item.faturamento|floatformat:0 }}</td>
+              <td>R$ {{ item.gastos|floatformat:0 }}</td>
+              <td>
+                <span style="font-weight:600;
+                  color:{% if item.margem_pct >= 10 %}var(--vale-green)
+                        {% elif item.margem_pct >= 0 %}#d97706
+                        {% else %}#dc2626{% endif %};">
+                  {{ item.margem_pct }}%
+                </span>
+              </td>
+              <td>
+                {% if item.dias_restantes <= 15 %}
+                  <span style="color:#dc2626;font-weight:600;">
+                    {{ item.dias_restantes }}d
+                  </span>
+                {% elif item.dias_restantes <= 60 %}
+                  <span style="color:#d97706;font-weight:600;">
+                    {{ item.dias_restantes }}d
+                  </span>
+                {% else %}
+                  <span style="color:var(--gray-600);">
+                    {{ item.dias_restantes }}d
+                  </span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="pill pill-{{ item.contrato.status }}">
+                  {{ item.contrato.get_status_display }}
+                </span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="9"
+                  style="text-align:center;padding:40px;color:var(--gray-600);">
+                <i class="bi bi-inbox" style="font-size:28px;"></i>
+                <p style="margin-top:8px;">
+                  Nenhum contrato vigente cadastrado ainda.
+                </p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Medições pendentes ──────────────────────────────────── -->
+{% if medicoes_pendentes %}
+<div class="row g-3">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-receipt-cutoff"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          Medições Pendentes de Pagamento
+        </h6>
+        <span class="badge-alerta">
+          R$ {{ valor_a_receber|floatformat:0 }}
+        </span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>BM</th>
+              <th>Contrato</th>
+              <th>Empresa</th>
+              <th>Competência</th>
+              <th>Valor Bruto</th>
+              <th>Valor Líquido</th>
+              <th>Previsão Pagamento</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in medicoes_pendentes %}
+            <tr>
+              <td style="font-weight:600;">
+                BM-{{ m.numero|stringformat:"03d" }}
+              </td>
+              <td>
+                <a href="{% url 'contratos:detalhe' m.contrato.pk %}"
+                  style="color:var(--vale-blue);font-weight:500;
+                          text-decoration:none;">
+                  {{ m.contrato.numero_sap }}
+                </a>
+              </td>
+              <td>{{ m.contrato.empresa.razao_social }}</td>
+              <td>{{ m.competencia|date:"m/Y" }}</td>
+              <td>R$ {{ m.valor_bruto|floatformat:0 }}</td>
+              <td style="font-weight:600;">
+                R$ {{ m.valor_liquido|floatformat:0 }}
+              </td>
+              <td>
+                {% if m.data_previsao_pagamento %}
+                  {{ m.data_previsao_pagamento|date:"d/m/Y" }}
+                {% else %}
+                  <span style="color:var(--gray-600);">—</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if m.status == 'aprovada' %}
+                  <span class="badge-ok">Aprovada</span>
+                {% elif m.status == 'glosada' %}
+                  <span class="badge-alerta">Com Glosa</span>
+                {% elif m.status == 'nf_emitida' %}
+                  <span class="badge-info">NF Emitida</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+const labels    = {{ chart_labels|safe }};
+const fatData   = {{ chart_fat|safe }};
+const gastoData = {{ chart_gastos|safe }};
+
+new Chart(document.getElementById('chartFatGastos'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [
+      {
+        label: 'Faturamento',
+        data: fatData,
+        backgroundColor: 'rgba(0,48,135,0.85)',
+        borderRadius: 6,
+        borderSkipped: false,
+      },
+      {
+        label: 'Gastos',
+        data: gastoData,
+        backgroundColor: 'rgba(0,112,60,0.75)',
+        borderRadius: 6,
+        borderSkipped: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: { font: { family: 'Inter', size: 12 }, padding: 16 }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx =>
+            ' R$ ' + ctx.parsed.y.toLocaleString('pt-BR',
+              { minimumFractionDigits: 0 })
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { font: { family: 'Inter', size: 12 } }
+      },
+      y: {
+        grid: { color: 'rgba(0,0,0,.05)' },
+        ticks: {
+          font: { family: 'Inter', size: 11 },
+          callback: v => 'R$ ' + (v / 1000).toFixed(0) + 'k'
+        }
+      }
+    }
+  }
+});
+</script>
+{% endblock %}

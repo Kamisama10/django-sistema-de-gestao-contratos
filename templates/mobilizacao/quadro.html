@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% block title %}Quadro — {{ contrato.numero_sap }}{% endblock %}
+{% block page_title %}
+  Quadro de Mobilização
+  <span style="color:var(--gray-600);font-weight:400;font-size:14px;">
+    — {{ contrato.numero_sap }}
+  </span>
+{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+  {% for msg in messages %}
+  <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;
+              padding:12px 16px;border-radius:8px;margin-bottom:16px;
+              display:flex;align-items:center;gap:8px;font-size:13px;">
+    <i class="bi bi-check-circle-fill"></i> {{ msg }}
+  </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Cabeçalho do contrato -->
+<div class="card mb-4">
+  <div class="card-body-custom">
+    <div style="display:flex;justify-content:space-between;
+                align-items:center;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--gray-600);
+                    text-transform:uppercase;letter-spacing:.4px;">
+          Contrato
+        </div>
+        <div style="font-size:18px;font-weight:700;color:var(--vale-blue);">
+          {{ contrato.numero_sap }}
+        </div>
+        <div style="font-size:13px;color:var(--gray-600);margin-top:2px;">
+          {{ contrato.empresa.razao_social }}
+          &nbsp;·&nbsp;
+          <span class="pill pill-{{ contrato.status }}">
+            {{ contrato.get_status_display }}
+          </span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="{% url 'mobilizacao:cargo_criar' contrato.pk %}"
+           style="display:inline-flex;align-items:center;gap:6px;
+                  background:var(--vale-blue);color:#fff;padding:8px 16px;
+                  border-radius:8px;text-decoration:none;font-size:13px;
+                  font-weight:600;">
+          <i class="bi bi-plus-lg"></i> Cargo Obrigatório
+        </a>
+        <a href="{% url 'mobilizacao:colaborador_criar' contrato.pk %}"
+           style="display:inline-flex;align-items:center;gap:6px;
+                  background:var(--vale-green);color:#fff;padding:8px 16px;
+                  border-radius:8px;text-decoration:none;font-size:13px;
+                  font-weight:600;">
+          <i class="bi bi-person-plus-fill"></i> Mobilizar Colaborador
+        </a>
+        <a href="{% url 'mobilizacao:exportar_pdf' contrato.pk %}"
+           style="display:inline-flex;align-items:center;gap:6px;
+                  background:#dc2626;color:#fff;padding:8px 14px;
+                  border-radius:8px;text-decoration:none;font-size:13px;
+                  font-weight:600;">
+          <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+        </a>
+        <a href="{% url 'mobilizacao:exportar_excel' contrato.pk %}"
+           style="display:inline-flex;align-items:center;gap:6px;
+                  background:#00703c;color:#fff;padding:8px 14px;
+                  border-radius:8px;text-decoration:none;font-size:13px;
+                  font-weight:600;">
+          <i class="bi bi-file-earmark-excel-fill"></i> Excel
+        </a>
+        <a href="{% url 'contratos:detalhe' contrato.pk %}"
+           style="display:inline-flex;align-items:center;gap:6px;
+                  background:var(--gray-200);color:var(--gray-900);padding:8px 14px;
+                  border-radius:8px;text-decoration:none;font-size:13px;
+                  font-weight:600;">
+          <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+
+  <!-- Quadro mínimo obrigatório -->
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-clipboard-check-fill"
+             style="color:var(--vale-blue);margin-right:8px;"></i>
+          Quadro Mínimo Obrigatório
+        </h6>
+      </div>
+      <div class="card-body-custom" style="padding:0;">
+        {% for cargo in cargos %}
+        <div style="padding:14px 20px;
+                    border-bottom:1px solid var(--gray-200);
+                    {% if cargo.situacao == 'critico' %}background:#fff5f5;
+                    {% elif cargo.situacao == 'alerta' %}background:#fffbeb;{% endif %}">
+          <div style="display:flex;justify-content:space-between;
+                      align-items:flex-start;">
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;display:flex;
+                          align-items:center;gap:6px;">
+                {{ cargo.funcao }}
+                {% if cargo.is_critico %}
+                <span class="badge-critico">CRÍTICO</span>
+                {% endif %}
+              </div>
+              {% if cargo.cbo %}
+              <div style="font-size:11px;color:var(--gray-600);margin-top:2px;">
+                CBO: {{ cargo.cbo }}
+              </div>
+              {% endif %}
+              {% if cargo.requer_habilitacao %}
+              <div style="font-size:11px;color:var(--vale-blue);margin-top:2px;">
+                <i class="bi bi-patch-check-fill"></i>
+                {{ cargo.habilitacao_descricao }}
+              </div>
+              {% endif %}
+            </div>
+            <div style="text-align:right;margin-left:12px;">
+              <div style="font-size:22px;font-weight:700;line-height:1;
+                color:{% if cargo.situacao == 'ok' %}var(--vale-green)
+                      {% elif cargo.situacao == 'critico' %}#dc2626
+                      {% else %}#d97706{% endif %};">
+                {{ cargo.total_ativos }}/{{ cargo.quantidade_minima }}
+              </div>
+              <div style="margin-top:4px;">
+                {% if cargo.situacao == 'ok' %}
+                  <span class="badge-ok">Regular</span>
+                {% elif cargo.situacao == 'critico' %}
+                  <span class="badge-critico">Déficit {{ cargo.deficit }}</span>
+                {% else %}
+                  <span class="badge-alerta">Déficit {{ cargo.deficit }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;">
+            <a href="{% url 'mobilizacao:cargo_editar' cargo.pk %}"
+               style="font-size:11px;color:var(--gray-600);text-decoration:none;">
+              <i class="bi bi-pencil-fill"></i> Editar cargo
+            </a>
+            <a href="{% url 'mobilizacao:colaborador_criar' contrato.pk %}"
+               style="font-size:11px;color:var(--vale-blue);text-decoration:none;
+                      font-weight:600;">
+              <i class="bi bi-person-plus-fill"></i> Mobilizar
+            </a>
+          </div>
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:32px;color:var(--gray-600);
+                    font-size:13px;">
+          Nenhum cargo obrigatório definido.
+          <br>
+          <a href="{% url 'mobilizacao:cargo_criar' contrato.pk %}"
+             style="color:var(--vale-blue);font-weight:600;">
+            Adicionar agora
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de colaboradores -->
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-people-fill"
+             style="color:var(--vale-blue);margin-right:8px;"></i>
+          Colaboradores Mobilizados
+        </h6>
+        <span class="badge-info">{{ colaboradores|length }} pessoa(s)</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Função</th>
+              <th>Cargo Vinculado</th>
+              <th>Mobilização</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for col in colaboradores %}
+            <tr>
+              <td>
+                <a href="{% url 'mobilizacao:colaborador_detalhe' col.pk %}"
+                   style="font-weight:600;color:var(--gray-900);
+                          text-decoration:none;">
+                  {{ col.nome_completo }}
+                </a>
+                {% if col.matricula_empresa %}
+                <div style="font-size:11px;color:var(--gray-600);">
+                  Mat: {{ col.matricula_empresa }}
+                </div>
+                {% endif %}
+              </td>
+              <td style="font-size:12.5px;">{{ col.funcao }}</td>
+              <td style="font-size:12px;color:var(--gray-600);">
+                {{ col.cargo_obrigatorio.funcao|default:"—" }}
+              </td>
+              <td style="white-space:nowrap;font-size:12.5px;">
+                {{ col.data_mobilizacao|date:"d/m/Y" }}
+              </td>
+              <td>
+                {% if col.status == 'mobilizado' %}
+                  <span class="badge-ok">Ativo</span>
+                {% elif col.status == 'afastado' %}
+                  <span class="badge-alerta">Afastado</span>
+                {% elif col.status == 'ferias' %}
+                  <span class="badge-info">Férias</span>
+                {% elif col.status == 'desmobilizado' %}
+                  <span style="background:#f1f5f9;color:#64748b;font-size:11px;
+                               font-weight:600;padding:3px 8px;border-radius:20px;">
+                    Desmobilizado
+                  </span>
+                {% else %}
+                  <span class="badge-alerta">{{ col.get_status_display }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <div style="display:flex;gap:6px;">
+                  <a href="{% url 'mobilizacao:colaborador_detalhe' col.pk %}"
+                     style="color:var(--vale-blue);font-size:15px;"
+                     title="Ver detalhes">
+                    <i class="bi bi-eye-fill"></i>
+                  </a>
+                  <a href="{% url 'mobilizacao:colaborador_editar' col.pk %}"
+                     style="color:var(--gray-600);font-size:15px;"
+                     title="Editar">
+                    <i class="bi bi-pencil-fill"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6"
+                  style="text-align:center;padding:32px;
+                         color:var(--gray-600);font-size:13px;">
+                Nenhum colaborador mobilizado ainda.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

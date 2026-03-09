@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div style="max-width:640px;">
+  <div class="card">
+    <div class="card-header-custom">
+      <h6>
+        <i class="bi bi-list-ul" style="color:var(--vale-blue);margin-right:8px;"></i>
+        Contrato: <span style="color:var(--vale-blue);">{{ contrato.numero_sap }}</span>
+      </h6>
+    </div>
+    <div class="card-body-custom">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label-custom">{{ form.descricao.label }}</label>
+            {{ form.descricao }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.unidade.label }}</label>
+            {{ form.unidade }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.quantidade.label }}</label>
+            {{ form.quantidade }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.preco_unitario.label }}</label>
+            {{ form.preco_unitario }}
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:20px;">
+          <button type="submit"
+                  style="background:var(--vale-blue);color:#fff;border:none;
+                        padding:9px 20px;border-radius:8px;font-size:13px;
+                        font-weight:600;cursor:pointer;">
+            <i class="bi bi-plus-lg"></i> Adicionar Item
+          </button>
+          <a href="{% url 'contratos:detalhe' contrato.pk %}"
+            style="background:var(--gray-200);color:var(--gray-900);
+                    padding:9px 16px;border-radius:8px;font-size:13px;
+                    font-weight:600;text-decoration:none;">
+            Cancelar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<style>
+  .form-label-custom { font-size:12px;font-weight:600;color:var(--gray-600);
+    text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px; }
+</style>
+{% endblock %}

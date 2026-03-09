@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+
+{% if tem_deficit_critico %}
+<div class="alert-panel critico" style="margin-bottom:20px;">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>
+    <div class="alert-panel-title">
+      ATENÇÃO — Quadro crítico com déficit
+    </div>
+    <div class="alert-panel-sub">
+      Este contrato possui cargo(s) obrigatório(s) sem cobertura.
+      A medição pode estar sujeita a glosa pela Vale.
+      Regularize o quadro antes de submeter.
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div style="max-width:820px;">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Identificação -->
+    <div class="card mb-3">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-receipt-cutoff"
+             style="color:var(--vale-blue);margin-right:8px;"></i>
+          Boletim de Medição —
+          <span style="color:var(--vale-blue);">{{ contrato.numero_sap }}</span>
+        </h6>
+      </div>
+      <div class="card-body-custom">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label-custom">{{ form.numero.label }}</label>
+            {{ form.numero }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label-custom">{{ form.competencia.label }}</label>
+            {{ form.competencia }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label-custom">{{ form.status.label }}</label>
+            {{ form.status }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label-custom">{{ form.numero_nf.label }}</label>
+            {{ form.numero_nf }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Valores -->
+    <div class="card mb-3">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-currency-dollar"
+             style="color:var(--vale-green);margin-right:8px;"></i>
+          Valores
+        </h6>
+      </div>
+      <div class="card-body-custom">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.valor_bruto.label }}</label>
+            {{ form.valor_bruto }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.valor_glosa.label }}</label>
+            {{ form.valor_glosa }}
+            {% if form.valor_glosa.value %}
+            <div style="font-size:11px;color:#dc2626;margin-top:4px;">
+              Informe a justificativa abaixo.
+            </div>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.valor_retencao.label }}</label>
+            {{ form.valor_retencao }}
+          </div>
+          <div class="col-12">
+            <label class="form-label-custom">
+              {{ form.justificativa_glosa.label }}
+            </label>
+            {{ form.justificativa_glosa }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datas -->
+    <div class="card mb-3">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-calendar3"
+             style="color:var(--vale-blue);margin-right:8px;"></i>
+          Datas do Ciclo
+        </h6>
+      </div>
+      <div class="card-body-custom">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.data_submissao.label }}</label>
+            {{ form.data_submissao }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.data_aprovacao.label }}</label>
+            {{ form.data_aprovacao }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.data_emissao_nf.label }}</label>
+            {{ form.data_emissao_nf }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">
+              {{ form.data_previsao_pagamento.label }}
+            </label>
+            {{ form.data_previsao_pagamento }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.data_pagamento.label }}</label>
+            {{ form.data_pagamento }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.documento.label }}</label>
+            {{ form.documento }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;">
+      <button type="submit"
+              style="background:var(--vale-blue);color:#fff;border:none;
+                    padding:10px 24px;border-radius:8px;font-size:14px;
+                    font-weight:600;cursor:pointer;">
+        <i class="bi bi-check-lg"></i> Salvar Medição
+      </button>
+      <a href="{% url 'financeiro:dre' contrato.pk %}"
+        style="background:var(--gray-200);color:var(--gray-900);
+                padding:10px 20px;border-radius:8px;font-size:14px;
+                font-weight:600;text-decoration:none;">
+        Cancelar
+      </a>
+    </div>
+
+  </form>
+</div>
+
+<style>
+  .form-label-custom {
+    font-size:12px; font-weight:600; color:var(--gray-600);
+    text-transform:uppercase; letter-spacing:.4px;
+    display:block; margin-bottom:5px;
+  }
+</style>
+{% endblock %}

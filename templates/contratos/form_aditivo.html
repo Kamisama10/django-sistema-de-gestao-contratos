@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div style="max-width:720px;">
+  <div class="card">
+    <div class="card-header-custom">
+      <h6>
+        <i class="bi bi-file-earmark-plus-fill" style="color:var(--vale-blue);margin-right:8px;"></i>
+        Contrato: <span style="color:var(--vale-blue);">{{ contrato.numero_sap }}</span>
+        &nbsp;·&nbsp;
+        <span style="color:var(--gray-600);font-weight:400;">{{ contrato.empresa.razao_social }}</span>
+      </h6>
+    </div>
+    <div class="card-body-custom">
+
+      <div style="background:var(--vale-blue-light);border-radius:8px;
+                  padding:12px 16px;margin-bottom:20px;font-size:13px;">
+        <strong>Valor atual do contrato:</strong>
+        R$ {{ contrato.valor_atual|floatformat:2 }} &nbsp;·&nbsp;
+        <strong>Término atual:</strong>
+        {{ contrato.data_termino_atual|date:"d/m/Y" }}
+      </div>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.numero.label }}</label>
+            {{ form.numero }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.tipo.label }}</label>
+            {{ form.tipo }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.data_assinatura.label }}</label>
+            {{ form.data_assinatura }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">{{ form.valor_acrescimo.label }}</label>
+            {{ form.valor_acrescimo }}
+            <div style="font-size:11px;color:var(--gray-600);margin-top:4px;">
+              Use valor negativo para supressão.
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">{{ form.nova_data_termino.label }}</label>
+            {{ form.nova_data_termino }}
+          </div>
+          <div class="col-12">
+            <label class="form-label-custom">{{ form.justificativa.label }}</label>
+            {{ form.justificativa }}
+          </div>
+          <div class="col-12">
+            <label class="form-label-custom">{{ form.documento.label }}</label>
+            {{ form.documento }}
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:20px;">
+          <button type="submit"
+                  style="background:var(--vale-blue);color:#fff;border:none;
+                        padding:10px 22px;border-radius:8px;font-size:13px;
+                        font-weight:600;cursor:pointer;">
+            <i class="bi bi-check-lg"></i> Registrar Aditivo
+          </button>
+          <a href="{% url 'contratos:detalhe' contrato.pk %}"
+            style="background:var(--gray-200);color:var(--gray-900);
+                    padding:10px 16px;border-radius:8px;font-size:13px;
+                    font-weight:600;text-decoration:none;">
+            Cancelar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<style>
+  .form-label-custom { font-size:12px;font-weight:600;color:var(--gray-600);
+    text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px; }
+</style>
+{% endblock %}

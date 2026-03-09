@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}Empresas — Vale{% endblock %}
+{% block page_title %}Empresas Contratadas{% endblock %}
+
+{% block content %}
+
+<!-- Barra de ações -->
+<div style="display:flex;justify-content:space-between;align-items:center;
+            margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+  <div style="font-size:13px;color:var(--gray-600);">
+    <strong style="color:var(--gray-900);">{{ total }}</strong> empresa(s) encontrada(s)
+  </div>
+  <a href="{% url 'empresas:criar' %}"
+    style="display:inline-flex;align-items:center;gap:8px;
+            background:var(--vale-blue);color:#fff;padding:9px 18px;
+            border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">
+    <i class="bi bi-plus-lg"></i> Nova Empresa
+  </a>
+</div>
+
+<!-- Filtros -->
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-body-custom">
+    <form method="get"
+          style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+
+      <div style="flex:2;min-width:200px;">
+        <label style="font-size:11px;font-weight:600;color:var(--gray-600);
+                      text-transform:uppercase;letter-spacing:.4px;
+                      display:block;margin-bottom:5px;">Buscar</label>
+        <input type="text" name="q" value="{{ busca }}"
+              placeholder="Razão social ou CNPJ..."
+              class="form-control" style="font-size:13px;">
+      </div>
+
+      <div style="flex:1;min-width:140px;">
+        <label style="font-size:11px;font-weight:600;color:var(--gray-600);
+                      text-transform:uppercase;letter-spacing:.4px;
+                      display:block;margin-bottom:5px;">Área</label>
+        <select name="area" class="form-select" style="font-size:13px;">
+          <option value="">Todas</option>
+          {% for val, label in area_choices %}
+          <option value="{{ val }}"
+            {% if area_atual == val %}selected{% endif %}>
+            {{ label }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="flex:1;min-width:120px;">
+        <label style="font-size:11px;font-weight:600;color:var(--gray-600);
+                      text-transform:uppercase;letter-spacing:.4px;
+                      display:block;margin-bottom:5px;">Situação</label>
+        <select name="ativa" class="form-select" style="font-size:13px;">
+          <option value="">Todas</option>
+          <option value="1" {% if ativa_atual == '1' %}selected{% endif %}>Ativas</option>
+          <option value="0" {% if ativa_atual == '0' %}selected{% endif %}>Inativas</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button type="submit"
+                style="background:var(--vale-blue);color:#fff;border:none;
+                      padding:9px 16px;border-radius:8px;font-size:13px;
+                      font-weight:600;cursor:pointer;">
+          <i class="bi bi-search"></i> Filtrar
+        </button>
+        <a href="{% url 'empresas:lista' %}"
+          style="background:var(--gray-200);color:var(--gray-900);
+                  padding:9px 14px;border-radius:8px;font-size:13px;
+                  font-weight:600;text-decoration:none;">
+          Limpar
+        </a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- Tabela -->
+<div class="card">
+  <div style="overflow-x:auto;">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>Razão Social</th>
+          <th>CNPJ</th>
+          <th>Área</th>
+          <th>E-mail</th>
+          <th>Telefone</th>
+          <th>Contratos</th>
+          <th>Situação</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in empresas %}
+        <tr>
+          <td>
+            <a href="{% url 'empresas:detalhe' e.pk %}"
+              style="font-weight:600;color:var(--vale-blue);text-decoration:none;">
+              {{ e.razao_social }}
+            </a>
+            {% if e.nome_fantasia %}
+            <div style="font-size:11px;color:var(--gray-600);">
+              {{ e.nome_fantasia }}
+            </div>
+            {% endif %}
+          </td>
+          <td style="font-family:monospace;font-size:13px;">{{ e.cnpj }}</td>
+          <td><span class="badge-info">{{ e.get_area_atuacao_display }}</span></td>
+          <td style="font-size:12.5px;">
+            {% if e.email %}
+            <a href="mailto:{{ e.email }}"
+              style="color:var(--vale-blue);text-decoration:none;">
+              {{ e.email }}
+            </a>
+            {% else %}—{% endif %}
+          </td>
+          <td style="font-size:12.5px;">{{ e.telefone|default:"—" }}</td>
+          <td style="text-align:center;">
+            <span class="badge-info">{{ e.total_contratos }}</span>
+          </td>
+          <td>
+            {% if e.ativa %}
+            <span class="badge-ok">Ativa</span>
+            {% else %}
+            <span style="background:#f1f5f9;color:#64748b;font-size:11px;
+                        font-weight:600;padding:3px 8px;border-radius:20px;">
+              Inativa
+            </span>
+            {% endif %}
+          </td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <a href="{% url 'empresas:detalhe' e.pk %}"
+                style="color:var(--vale-blue);font-size:16px;" title="Ver detalhe">
+                <i class="bi bi-eye-fill"></i>
+              </a>
+              <a href="{% url 'empresas:editar' e.pk %}"
+                style="color:var(--gray-600);font-size:16px;" title="Editar">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8"
+              style="text-align:center;padding:48px;color:var(--gray-600);">
+            <i class="bi bi-building"
+              style="font-size:36px;display:block;margin-bottom:8px;"></i>
+            Nenhuma empresa cadastrada.
+            <a href="{% url 'empresas:criar' %}"
+              style="color:var(--vale-blue);font-weight:600;">
+              Cadastrar a primeira
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

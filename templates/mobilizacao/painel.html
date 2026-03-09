@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% block title %}Mobilização — Vale{% endblock %}
+{% block page_title %}Painel de Mobilização{% endblock %}
+
+{% block content %}
+
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon red"><i class="bi bi-person-x-fill"></i></div>
+      <div>
+        <div class="kpi-label">Déficits Críticos</div>
+        <div class="kpi-value" style="color:#dc2626;">{{ total_criticos }}</div>
+        <div class="kpi-sub">Requer ação imediata</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon yellow"><i class="bi bi-person-dash-fill"></i></div>
+      <div>
+        <div class="kpi-label">Déficits em Alerta</div>
+        <div class="kpi-value" style="color:#d97706;">{{ total_alertas }}</div>
+        <div class="kpi-sub">Regularizar em 48h</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon green"><i class="bi bi-person-check-fill"></i></div>
+      <div>
+        <div class="kpi-label">Cargos Regulares</div>
+        <div class="kpi-value" style="color:var(--vale-green);">{{ total_regulares }}</div>
+        <div class="kpi-sub">Quadro completo</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon yellow"><i class="bi bi-patch-exclamation-fill"></i></div>
+      <div>
+        <div class="kpi-label">Habilitações Vencidas</div>
+        <div class="kpi-value" style="color:#d97706;">{{ hab_vencidas|length }}</div>
+        <div class="kpi-sub">{{ hab_vencendo|length }} vencendo em 30 dias</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Críticos -->
+{% if criticos %}
+<div class="card mb-3">
+  <div class="card-header-custom">
+    <h6>
+      <i class="bi bi-exclamation-triangle-fill"
+         style="color:#dc2626;margin-right:8px;"></i>
+      Déficits Críticos
+    </h6>
+    <span class="badge-critico">{{ total_criticos }} cargo(s)</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>Contrato</th>
+          <th>Empresa</th>
+          <th>Cargo / Função</th>
+          <th>Mínimo</th>
+          <th>Ativos</th>
+          <th>Déficit</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in criticos %}
+        <tr style="background:#fff5f5;">
+          <td>
+            <a href="{% url 'contratos:detalhe' c.contrato.pk %}"
+               style="font-weight:700;color:var(--vale-blue);text-decoration:none;">
+              {{ c.contrato.numero_sap }}
+            </a>
+          </td>
+          <td style="font-size:12.5px;">{{ c.contrato.empresa.razao_social }}</td>
+          <td>
+            <span style="font-weight:600;">{{ c.funcao }}</span>
+            <span class="badge-critico" style="margin-left:6px;">CRÍTICO</span>
+          </td>
+          <td style="text-align:center;font-weight:600;">{{ c.quantidade_minima }}</td>
+          <td style="text-align:center;color:#dc2626;font-weight:700;">
+            {{ c.total_ativos }}
+          </td>
+          <td style="text-align:center;">
+            <span class="badge-critico">-{{ c.deficit }}</span>
+          </td>
+          <td>
+            <a href="{% url 'mobilizacao:colaborador_criar' c.contrato.pk %}"
+               style="font-size:12px;color:var(--vale-blue);
+                      text-decoration:none;font-weight:600;">
+              <i class="bi bi-person-plus-fill"></i> Mobilizar
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Alertas -->
+{% if alertas %}
+<div class="card mb-3">
+  <div class="card-header-custom">
+    <h6>
+      <i class="bi bi-exclamation-circle-fill"
+         style="color:#d97706;margin-right:8px;"></i>
+      Déficits em Alerta
+    </h6>
+    <span class="badge-alerta">{{ total_alertas }} cargo(s)</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>Contrato</th>
+          <th>Empresa</th>
+          <th>Cargo / Função</th>
+          <th>Mínimo</th>
+          <th>Ativos</th>
+          <th>Déficit</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in alertas %}
+        <tr>
+          <td>
+            <a href="{% url 'contratos:detalhe' c.contrato.pk %}"
+               style="font-weight:700;color:var(--vale-blue);text-decoration:none;">
+              {{ c.contrato.numero_sap }}
+            </a>
+          </td>
+          <td style="font-size:12.5px;">{{ c.contrato.empresa.razao_social }}</td>
+          <td style="font-weight:600;">{{ c.funcao }}</td>
+          <td style="text-align:center;font-weight:600;">{{ c.quantidade_minima }}</td>
+          <td style="text-align:center;color:#d97706;font-weight:700;">
+            {{ c.total_ativos }}
+          </td>
+          <td style="text-align:center;">
+            <span class="badge-alerta">-{{ c.deficit }}</span>
+          </td>
+          <td>
+            <a href="{% url 'mobilizacao:colaborador_criar' c.contrato.pk %}"
+               style="font-size:12px;color:var(--vale-blue);
+                      text-decoration:none;font-weight:600;">
+              <i class="bi bi-person-plus-fill"></i> Mobilizar
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Habilitações vencidas -->
+{% if hab_vencidas or hab_vencendo %}
+<div class="card mb-3">
+  <div class="card-header-custom">
+    <h6>
+      <i class="bi bi-patch-exclamation-fill"
+         style="color:#d97706;margin-right:8px;"></i>
+      Habilitações com Problema
+    </h6>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>Colaborador</th>
+          <th>Contrato</th>
+          <th>Habilitação</th>
+          <th>Validade</th>
+          <th>Situação</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in hab_vencidas %}
+        <tr style="background:#fff5f5;">
+          <td style="font-weight:600;">{{ h.colaborador.nome_completo }}</td>
+          <td>
+            <a href="{% url 'contratos:detalhe' h.colaborador.contrato.pk %}"
+               style="color:var(--vale-blue);text-decoration:none;font-weight:600;">
+              {{ h.colaborador.contrato.numero_sap }}
+            </a>
+          </td>
+          <td>{{ h.descricao }}</td>
+          <td style="color:#dc2626;font-weight:600;">
+            {{ h.data_validade|date:"d/m/Y" }}
+          </td>
+          <td><span class="badge-critico">Vencida</span></td>
+          <td>
+            <a href="{% url 'mobilizacao:colaborador_detalhe' h.colaborador.pk %}"
+               style="font-size:12px;color:var(--vale-blue);
+                      text-decoration:none;font-weight:600;">
+              Ver colaborador
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+        {% for h in hab_vencendo %}
+        <tr style="background:#fffbeb;">
+          <td style="font-weight:600;">{{ h.colaborador.nome_completo }}</td>
+          <td>
+            <a href="{% url 'contratos:detalhe' h.colaborador.contrato.pk %}"
+               style="color:var(--vale-blue);text-decoration:none;font-weight:600;">
+              {{ h.colaborador.contrato.numero_sap }}
+            </a>
+          </td>
+          <td>{{ h.descricao }}</td>
+          <td style="color:#d97706;font-weight:600;">
+            {{ h.data_validade|date:"d/m/Y" }}
+          </td>
+          <td><span class="badge-alerta">Vence em breve</span></td>
+          <td>
+            <a href="{% url 'mobilizacao:colaborador_detalhe' h.colaborador.pk %}"
+               style="font-size:12px;color:var(--vale-blue);
+                      text-decoration:none;font-weight:600;">
+              Ver colaborador
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Quadro regular -->
+{% if regulares %}
+<div class="card">
+  <div class="card-header-custom">
+    <h6>
+      <i class="bi bi-check-circle-fill"
+         style="color:var(--vale-green);margin-right:8px;"></i>
+      Cargos Regulares
+    </h6>
+    <span class="badge-ok">{{ total_regulares }} cargo(s)</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>Contrato</th>
+          <th>Empresa</th>
+          <th>Cargo / Função</th>
+          <th>Mínimo</th>
+          <th>Ativos</th>
+          <th>Situação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in regulares %}
+        <tr>
+          <td>
+            <a href="{% url 'contratos:detalhe' c.contrato.pk %}"
+               style="font-weight:700;color:var(--vale-blue);text-decoration:none;">
+              {{ c.contrato.numero_sap }}
+            </a>
+          </td>
+          <td style="font-size:12.5px;">{{ c.contrato.empresa.razao_social }}</td>
+          <td style="font-weight:500;">{{ c.funcao }}</td>
+          <td style="text-align:center;">{{ c.quantidade_minima }}</td>
+          <td style="text-align:center;color:var(--vale-green);font-weight:700;">
+            {{ c.total_ativos }}
+          </td>
+          <td><span class="badge-ok">Regular</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if not criticos and not alertas and not regulares %}
+<div style="text-align:center;padding:64px;color:var(--gray-600);">
+  <i class="bi bi-people" style="font-size:48px;display:block;margin-bottom:12px;"></i>
+  <p style="font-size:15px;font-weight:500;">Nenhum cargo obrigatório cadastrado.</p>
+  <p style="font-size:13px;">
+    Acesse um contrato vigente e adicione os cargos obrigatórios do quadro mínimo.
+  </p>
+</div>
+{% endif %}
+
+{% endblock %}

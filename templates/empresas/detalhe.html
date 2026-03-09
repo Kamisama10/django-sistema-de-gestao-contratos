@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% block title %}{{ empresa.razao_social }} — Vale{% endblock %}
+{% block page_title %}{{ empresa.razao_social }}{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+  {% for msg in messages %}
+  <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;
+              padding:12px 16px;border-radius:8px;margin-bottom:16px;
+              display:flex;align-items:center;gap:8px;font-size:13px;">
+    <i class="bi bi-check-circle-fill"></i> {{ msg }}
+  </div>
+  {% endfor %}
+{% endif %}
+
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon blue">
+        <i class="bi bi-file-earmark-text-fill"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Contratos Vigentes</div>
+        <div class="kpi-value">{{ vigentes }}</div>
+        <div class="kpi-sub">{{ encerrados }} encerrado(s)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon green">
+        <i class="bi bi-currency-dollar"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Carteira Vigente</div>
+        <div class="kpi-value" style="font-size:17px;">
+          R$ {{ valor_carteira|floatformat:0 }}
+        </div>
+        <div class="kpi-sub">Valor atual dos contratos ativos</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon purple">
+        <i class="bi bi-graph-up-arrow"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Total Faturado</div>
+        <div class="kpi-value" style="font-size:17px;">
+          R$ {{ total_faturado|floatformat:0 }}
+        </div>
+        <div class="kpi-sub">Medições aprovadas acumuladas</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card">
+      <div class="kpi-icon {% if empresa.ativa %}green{% else %}red{% endif %}">
+        <i class="bi bi-building-check"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Situação</div>
+        <div class="kpi-value" style="font-size:17px;">
+          {% if empresa.ativa %}
+          <span style="color:var(--vale-green);">Ativa</span>
+          {% else %}
+          <span style="color:#dc2626;">Inativa</span>
+          {% endif %}
+        </div>
+        <div class="kpi-sub">{{ empresa.get_area_atuacao_display }}</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row g-3">
+
+  <!-- Dados da empresa -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-building"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          Dados Cadastrais
+        </h6>
+        <a href="{% url 'empresas:editar' empresa.pk %}"
+          style="font-size:12px;color:var(--vale-blue);
+                  text-decoration:none;font-weight:600;">
+          <i class="bi bi-pencil-fill"></i> Editar
+        </a>
+      </div>
+      <div class="card-body-custom">
+
+        <div style="font-size:13px;">
+
+          {% if empresa.nome_fantasia %}
+          <div style="margin-bottom:14px;">
+            <div class="detalhe-label">Nome Fantasia</div>
+            <div style="font-weight:500;">{{ empresa.nome_fantasia }}</div>
+          </div>
+          {% endif %}
+
+          <div style="margin-bottom:14px;">
+            <div class="detalhe-label">CNPJ</div>
+            <div style="font-family:monospace;font-weight:600;
+                        font-size:14px;">{{ empresa.cnpj }}</div>
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <div class="detalhe-label">Área de Atuação</div>
+            <span class="badge-info">{{ empresa.get_area_atuacao_display }}</span>
+          </div>
+
+          {% if empresa.email %}
+          <div style="margin-bottom:14px;">
+            <div class="detalhe-label">E-mail</div>
+            <a href="mailto:{{ empresa.email }}"
+              style="color:var(--vale-blue);text-decoration:none;
+                      font-size:13px;">
+              {{ empresa.email }}
+            </a>
+          </div>
+          {% endif %}
+
+          {% if empresa.telefone %}
+          <div style="margin-bottom:14px;">
+            <div class="detalhe-label">Telefone</div>
+            <div>{{ empresa.telefone }}</div>
+          </div>
+          {% endif %}
+
+          {% if empresa.endereco %}
+          <div style="margin-bottom:14px;">
+            <div class="detalhe-label">Endereço</div>
+            <div style="line-height:1.5;color:var(--gray-600);">
+              {{ empresa.endereco }}
+            </div>
+          </div>
+          {% endif %}
+
+          <div>
+            <div class="detalhe-label">Cadastrada em</div>
+            <div>{{ empresa.criado_em|date:"d/m/Y" }}</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contratos da empresa -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header-custom">
+        <h6>
+          <i class="bi bi-file-earmark-text-fill"
+            style="color:var(--vale-blue);margin-right:8px;"></i>
+          Contratos
+        </h6>
+        <a href="{% url 'contratos:criar' %}"
+          style="font-size:12px;color:var(--vale-blue);
+                  text-decoration:none;font-weight:600;">
+          <i class="bi bi-plus-lg"></i> Novo Contrato
+        </a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Nº SAP</th>
+              <th>Objeto</th>
+              <th>Área</th>
+              <th>Valor Atual</th>
+              <th>Término</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in contratos %}
+            <tr>
+              <td>
+                <a href="{% url 'contratos:detalhe' c.pk %}"
+                  style="font-weight:700;color:var(--vale-blue);
+                          text-decoration:none;">
+                  {{ c.numero_sap }}
+                </a>
+              </td>
+              <td style="max-width:200px;overflow:hidden;
+                        text-overflow:ellipsis;white-space:nowrap;
+                        font-size:12.5px;color:var(--gray-600);">
+                {{ c.objeto }}
+              </td>
+              <td>
+                <span class="badge-info">{{ c.get_area_display }}</span>
+              </td>
+              <td style="font-weight:600;white-space:nowrap;">
+                R$ {{ c.valor_atual|floatformat:0 }}
+              </td>
+              <td style="white-space:nowrap;">
+                {{ c.data_termino_atual|date:"d/m/Y" }}
+              </td>
+              <td>
+                <span class="pill pill-{{ c.status }}">
+                  {{ c.get_status_display }}
+                </span>
+              </td>
+              <td>
+                <a href="{% url 'contratos:detalhe' c.pk %}"
+                  style="color:var(--vale-blue);font-size:15px;">
+                  <i class="bi bi-eye-fill"></i>
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7"
+                  style="text-align:center;padding:32px;
+                        color:var(--gray-600);font-size:13px;">
+                <i class="bi bi-file-earmark-x"
+                  style="font-size:28px;display:block;margin-bottom:8px;"></i>
+                Nenhum contrato vinculado a esta empresa.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .detalhe-label {
+    font-size: 11px; font-weight: 600;
+    color: var(--gray-600);
+    text-transform: uppercase; letter-spacing: .4px;
+    margin-bottom: 3px;
+  }
+</style>
+
+{% endblock %}

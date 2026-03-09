@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div style="max-width:780px;">
+  <div class="card">
+    <div class="card-header-custom">
+      <h6>
+        <i class="bi bi-person-plus-fill"
+           style="color:var(--vale-blue);margin-right:8px;"></i>
+        Contrato:
+        <span style="color:var(--vale-blue);">{{ contrato.numero_sap }}</span>
+        &nbsp;·&nbsp;
+        <span style="color:var(--gray-600);font-weight:400;">
+          {{ contrato.empresa.razao_social }}
+        </span>
+      </h6>
+    </div>
+    <div class="card-body-custom">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label-custom">{{ form.nome_completo.label }}</label>
+            {{ form.nome_completo }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.cpf.label }}</label>
+            {{ form.cpf }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.matricula_empresa.label }}</label>
+            {{ form.matricula_empresa }}
+          </div>
+          <div class="col-md-8">
+            <label class="form-label-custom">{{ form.funcao.label }}</label>
+            {{ form.funcao }}
+          </div>
+          <div class="col-12">
+            <label class="form-label-custom">{{ form.cargo_obrigatorio.label }}</label>
+            {{ form.cargo_obrigatorio }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.data_mobilizacao.label }}</label>
+            {{ form.data_mobilizacao }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.data_desmobilizacao.label }}</label>
+            {{ form.data_desmobilizacao }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">{{ form.status.label }}</label>
+            {{ form.status }}
+          </div>
+          <div class="col-12">
+            <label class="form-label-custom">{{ form.observacao.label }}</label>
+            {{ form.observacao }}
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:20px;">
+          <button type="submit"
+                  style="background:var(--vale-green);color:#fff;border:none;
+                         padding:9px 20px;border-radius:8px;font-size:13px;
+                         font-weight:600;cursor:pointer;">
+            <i class="bi bi-person-check-fill"></i> Mobilizar
+          </button>
+          <a href="{% url 'mobilizacao:quadro' contrato.pk %}"
+             style="background:var(--gray-200);color:var(--gray-900);
+                    padding:9px 16px;border-radius:8px;font-size:13px;
+                    font-weight:600;text-decoration:none;">
+            Cancelar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<style>
+  .form-label-custom { font-size:12px;font-weight:600;color:var(--gray-600);
+    text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px; }
+</style>
+{% endblock %}
