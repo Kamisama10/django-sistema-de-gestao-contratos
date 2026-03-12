@@ -53,6 +53,9 @@ INSTALLED_APPS = [
     'mobilizacao',
     'financeiro',
 
+    #tela de login e acesso
+    'accounts',
+
 
 ]
 
@@ -148,3 +151,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_URL          = '/admin/login/'
 LOGIN_REDIRECT_URL = '/'
+
+
+LOGIN_URL          = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'

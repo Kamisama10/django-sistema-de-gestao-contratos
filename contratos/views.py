@@ -72,15 +72,22 @@ def dashboard(request):
 
     # ── Gráfico: faturamento x gastos últimos 6 meses ─────────────────────
     labels, fat_data, gasto_data = [], [], []
+    mes_base = hoje.replace(day=1)
     for i in range(5, -1, -1):
-        d = (hoje.replace(day=1) - timedelta(days=i * 30)).replace(day=1)
+        # Subtrai i meses de forma precisa
+        mes = mes_base.replace(day=1)
+        total_mes = mes.month - i
+        ano = mes.year + (total_mes - 1) // 12
+        mes_num = ((total_mes - 1) % 12) + 1
+        d = date(ano, mes_num, 1)
+
         f = Medicao.objects.filter(
             competencia=d,
             status__in=['aprovada', 'glosada', 'nf_emitida', 'paga']
-        ).aggregate(t=Sum('valor_bruto'))['t'] or 0
+    ).aggregate(t=Sum('valor_bruto'))['t'] or 0
         g = GastoOperacional.objects.filter(
             competencia=d, tipo='realizado'
-        ).aggregate(t=Sum('valor'))['t'] or 0
+    ).aggregate(t=Sum('valor'))['t'] or 0
         labels.append(d.strftime('%b/%y'))
         fat_data.append(float(f))
         gasto_data.append(float(g))
