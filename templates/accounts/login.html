@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Mobilizze</title>
+  <title>Login Mobilizze Sistemas</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -12,239 +12,291 @@
     body {
       font-family: 'Inter', sans-serif;
       min-height: 100vh;
-      display: flex;
-      background: #f0f4f8;
-    }
-
-    /* ── Painel esquerdo ── */
-    .auth-left {
-      width: 480px;
-      min-height: 100vh;
-      background: #003087;
+      background: #fafafa;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      padding: 48px 52px;
-      position: relative;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-    .auth-left::before {
-      content: '';
-      position: absolute;
-      width: 500px; height: 500px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.04);
-      top: -120px; left: -120px;
-    }
-    .auth-left::after {
-      content: '';
-      position: absolute;
-      width: 300px; height: 300px;
-      border-radius: 50%;
-      background: rgba(0,112,60,.25);
-      bottom: -60px; right: -60px;
-    }
-    .auth-logo {
-      position: relative; z-index: 1;
-    }
-    .auth-logo .mark {
-      font-size: 36px; font-weight: 700;
-      color: #fff; letter-spacing: -1px;
-    }
-    .auth-logo .sub {
-      font-size: 12px; color: rgba(255,255,255,.5);
-      text-transform: uppercase; letter-spacing: 1px;
-      margin-top: 4px;
-    }
-    .auth-hero {
-      position: relative; z-index: 1;
-    }
-    .auth-hero h1 {
-      font-size: 30px; font-weight: 700;
-      color: #fff; line-height: 1.3;
-      margin-bottom: 16px;
-    }
-    .auth-hero p {
-      font-size: 14px; color: rgba(255,255,255,.6);
-      line-height: 1.7;
-    }
-    .auth-features {
-      position: relative; z-index: 1;
-      list-style: none;
-      margin-top: 32px;
-    }
-    .auth-features li {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 13px; color: rgba(255,255,255,.75);
-      margin-bottom: 12px;
-    }
-    .auth-features li i {
-      width: 28px; height: 28px;
-      background: rgba(255,255,255,.1);
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; color: #4ade80;
-      flex-shrink: 0;
-    }
-    .auth-footer-left {
-      position: relative; z-index: 1;
-      font-size: 11px; color: rgba(255,255,255,.3);
     }
 
-    /* ── Painel direito ── */
-    .auth-right {
+    /* ── Topbar ── */
+    .login-topbar {
+      height: 56px;
+      background: #fff;
+      border-bottom: 1px solid #e4e4e7;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      justify-content: space-between;
+    }
+    .login-logo {
+      font-size: 16px;
+      font-weight: 700;
+      color: #09090b;
+      letter-spacing: -.4px;
+      text-decoration: none;
+    }
+    .login-logo span { color: #1d4ed8; }
+    .login-topbar-right {
+      font-size: 13px;
+      color: #71717a;
+    }
+    .login-topbar-right a {
+      color: #1d4ed8;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .login-topbar-right a:hover { text-decoration: underline; }
+
+    /* ── Centro ── */
+    .login-body {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 40px 24px;
+      padding: 48px 24px;
     }
-    .auth-box {
+    .login-card {
       width: 100%;
-      max-width: 420px;
-    }
-    .auth-box-title {
-      font-size: 24px; font-weight: 700;
-      color: #111827; margin-bottom: 6px;
-    }
-    .auth-box-sub {
-      font-size: 14px; color: #6b7280;
-      margin-bottom: 32px;
+      max-width: 400px;
     }
 
-    /* Alertas */
-    .auth-alert {
-      background: #fee2e2; border: 1px solid #fecaca;
-      color: #991b1b; border-radius: 8px;
-      padding: 12px 14px; font-size: 13px;
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 20px;
+    /* Cabeçalho do card */
+    .login-head { margin-bottom: 32px; }
+    .login-head-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
     }
-    .auth-alert-success {
-      background: #dcfce7; border: 1px solid #86efac;
-      color: #166534;
+    .login-head-logo-mark {
+      width: 36px; height: 36px;
+      background: #09090b;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -.5px;
+      flex-shrink: 0;
+    }
+    .login-head-logo-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: #09090b;
+      letter-spacing: -.3px;
+    }
+    .login-head-logo-text span { color: #1d4ed8; }
+    .login-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #09090b;
+      margin-bottom: 6px;
+      letter-spacing: -.3px;
+    }
+    .login-sub {
+      font-size: 14px;
+      color: #71717a;
+      line-height: 1.5;
+    }
+
+    /* Alerta */
+    .login-alert {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
     }
 
     /* Campos */
-    .auth-field { margin-bottom: 18px; }
-    .auth-label {
+    .login-field { margin-bottom: 16px; }
+    .login-label {
       display: block;
-      font-size: 12px; font-weight: 600;
-      color: #374151; text-transform: uppercase;
-      letter-spacing: .4px; margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #3f3f46;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      margin-bottom: 6px;
     }
-    .auth-input {
-      width: 100%; padding: 11px 14px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 8px; font-size: 14px;
+
+    /* Inputs — cobre tanto a classe quanto o elemento direto */
+    .login-input,
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #e4e4e7;
+      border-radius: 8px;
+      font-size: 14px;
       font-family: 'Inter', sans-serif;
-      color: #111827; background: #fff;
-      transition: border-color .15s, box-shadow .15s;
+      color: #09090b;
+      background: #fff;
       outline: none;
+      transition: border-color .15s, box-shadow .15s;
     }
-    .auth-input:focus {
-      border-color: #003087;
-      box-shadow: 0 0 0 3px rgba(0,48,135,.1);
+    .login-input:focus,
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 3px rgba(29,78,216,.1);
     }
-    .auth-input::placeholder { color: #9ca3af; }
+    .login-input::placeholder,
+    input[type="text"]::placeholder,
+    input[type="password"]::placeholder {
+      color: #a1a1aa;
+    }
 
-    /* Botão */
-    .auth-btn {
-      width: 100%; padding: 12px;
-      background: #003087; color: #fff;
-      border: none; border-radius: 8px;
-      font-size: 14px; font-weight: 600;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer; margin-top: 8px;
-      transition: background .15s, transform .1s;
+    /* Toggle senha */
+    .login-input-wrap { position: relative; }
+    .login-input-wrap input[type="password"],
+    .login-input-wrap input[type="text"] {
+      padding-right: 40px;
+    }
+    .login-eye {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      cursor: pointer;
+      color: #a1a1aa;
+      font-size: 15px;
+      padding: 0;
       display: flex; align-items: center;
-      justify-content: center; gap: 8px;
+      transition: color .1s;
     }
-    .auth-btn:hover { background: #004bb5; }
-    .auth-btn:active { transform: scale(.98); }
+    .login-eye:hover { color: #09090b; }
 
-    /* Link */
-    .auth-link-row {
-      text-align: center; margin-top: 24px;
-      font-size: 13px; color: #6b7280;
+    /* Botão principal */
+    .login-btn {
+      width: 100%;
+      padding: 11px;
+      background: #09090b;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background .15s, transform .1s;
     }
-    .auth-link-row a {
-      color: #003087; font-weight: 600;
-      text-decoration: none;
-    }
-    .auth-link-row a:hover { text-decoration: underline; }
+    .login-btn:hover { background: #1d4ed8; }
+    .login-btn:active { transform: scale(.98); }
 
     /* Divisor */
-    .auth-divider {
-      display: flex; align-items: center;
-      gap: 12px; margin: 24px 0;
-      font-size: 12px; color: #9ca3af;
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+      font-size: 12px;
+      color: #a1a1aa;
     }
-    .auth-divider::before,
-    .auth-divider::after {
+    .login-divider::before,
+    .login-divider::after {
       content: ''; flex: 1;
-      height: 1px; background: #e5e7eb;
+      height: 1px; background: #e4e4e7;
     }
 
-    @media (max-width: 768px) {
-      .auth-left { display: none; }
+    /* Link inferior */
+    .login-bottom {
+      text-align: center;
+      font-size: 13px;
+      color: #71717a;
+    }
+    .login-bottom a {
+      color: #1d4ed8;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .login-bottom a:hover { text-decoration: underline; }
+
+    /* Features */
+    .login-features {
+      margin-top: 40px;
+      padding-top: 28px;
+      border-top: 1px solid #e4e4e7;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .login-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .login-feature-icon {
+      width: 30px; height: 30px;
+      background: #eff6ff;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      color: #1d4ed8;
+      flex-shrink: 0;
+    }
+    .login-feature-text {
+      font-size: 12px;
+      color: #52525b;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+
+    /* Footer */
+    .login-footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 11px;
+      color: #a1a1aa;
+      border-top: 1px solid #e4e4e7;
+      background: #fff;
+    }
+
+    @media (max-width: 480px) {
+      .login-topbar  { padding: 0 16px; }
+      .login-body    { padding: 32px 16px; }
+      .login-features { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- Painel esquerdo -->
-<div class="auth-left">
-  <div class="auth-logo">
-    <div class="mark">MOBILIZZE</div>
-    <div class="sub">Gestão de Contratos</div>
+<!-- Topbar -->
+<header class="login-topbar">
+  <a href="#" class="login-logo">Mobilizze<span>.</span></a>
+
   </div>
+</header>
 
-  <div class="auth-hero">
-    <h1>Gerencie seus contratos com eficiência</h1>
-    <p>
-      Plataforma integrada para controle de contratos,
-      mobilização de equipes e gestão financeira de obras.
-    </p>
-    <ul class="auth-features">
-      <li>
-        <i class="bi bi-file-earmark-check-fill"></i>
-        Gestão completa de contratos e aditivos
-      </li>
-      <li>
-        <i class="bi bi-people-fill"></i>
-        Controle de quadro mínimo obrigatório
-      </li>
-      <li>
-        <i class="bi bi-bar-chart-fill"></i>
-        DRE mensal e análise de margem
-      </li>
-      <li>
-        <i class="bi bi-bell-fill"></i>
-        Alertas automáticos de vencimento e déficit
-      </li>
-    </ul>
-  </div>
+<!-- Corpo -->
+<div class="login-body">
+  <div class="login-card">
 
-  <div class="auth-footer-left">
-    © {{ year }} Mobilizze Sistemas — Todos os direitos reservados
-  </div>
-</div>
-
-<!-- Painel direito -->
-<div class="auth-right">
-  <div class="auth-box">
-
-    <div class="auth-box-title">Bem-vindo de volta</div>
-    <div class="auth-box-sub">
-      Entre com suas credenciais para acessar o sistema
+    <!-- Cabeçalho -->
+    <div class="login-head">
+      <div class="login-head-logo">
+        <div class="login-head-logo-mark">M</div>
+        <div class="login-head-logo-text">Mobilizze<span>.</span></div>
+      </div>
+      <div class="login-title">Bem-vindo de volta</div>
+      <div class="login-sub">
+        Entre com suas credenciais para acessar o sistema
+      </div>
     </div>
 
-    <!-- Mensagens de erro -->
+    <!-- Alerta de erro -->
     {% if messages %}
       {% for msg in messages %}
-      <div class="auth-alert">
+      <div class="login-alert">
         <i class="bi bi-exclamation-circle-fill"></i>
         {{ msg }}
       </div>
@@ -255,8 +307,8 @@
     <form method="post" novalidate>
       {% csrf_token %}
 
-      <div class="auth-field">
-        <label class="auth-label" for="{{ form.username.id_for_label }}">
+      <div class="login-field">
+        <label class="login-label" for="{{ form.username.id_for_label }}">
           {{ form.username.label }}
         </label>
         {{ form.username }}
@@ -267,17 +319,13 @@
         {% endif %}
       </div>
 
-      <div class="auth-field">
-        <label class="auth-label" for="{{ form.password.id_for_label }}">
+      <div class="login-field">
+        <label class="login-label" for="{{ form.password.id_for_label }}">
           {{ form.password.label }}
         </label>
-        <div style="position:relative;">
+        <div class="login-input-wrap">
           {{ form.password }}
-          <button type="button" onclick="toggleSenha(this)"
-                  style="position:absolute;right:12px;top:50%;
-                         transform:translateY(-50%);background:none;
-                         border:none;cursor:pointer;color:#9ca3af;
-                         font-size:16px;padding:0;">
+          <button type="button" class="login-eye" onclick="toggleSenha(this)">
             <i class="bi bi-eye-fill"></i>
           </button>
         </div>
@@ -288,25 +336,58 @@
         {% endif %}
       </div>
 
-      <button type="submit" class="auth-btn">
+      <button type="submit" class="login-btn">
         <i class="bi bi-box-arrow-in-right"></i>
         Entrar no Sistema
       </button>
     </form>
 
-    <div class="auth-divider">ou</div>
+    <div class="login-divider">ou</div>
 
-    <div class="auth-link-row">
+    <div class="login-bottom">
       Não tem conta?
       <a href="{% url 'accounts:cadastro' %}">Criar conta agora</a>
+    </div>
+
+    <!-- Features -->
+    <div class="login-features">
+      <div class="login-feature">
+        <div class="login-feature-icon">
+          <i class="bi bi-file-earmark-check-fill"></i>
+        </div>
+        <div class="login-feature-text">Gestão de contratos e aditivos</div>
+      </div>
+      <div class="login-feature">
+        <div class="login-feature-icon">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="login-feature-text">Controle de quadro mínimo</div>
+      </div>
+      <div class="login-feature">
+        <div class="login-feature-icon">
+          <i class="bi bi-calculator-fill"></i>
+        </div>
+        <div class="login-feature-text">DRE mensal e margem</div>
+      </div>
+      <div class="login-feature">
+        <div class="login-feature-icon">
+          <i class="bi bi-bell-fill"></i>
+        </div>
+        <div class="login-feature-text">Alertas de vencimento</div>
+      </div>
     </div>
 
   </div>
 </div>
 
+<!-- Footer -->
+<footer class="login-footer">
+  © {% now "Y" %} Mobilizze Sistemas — Todos os direitos reservados
+</footer>
+
 <script>
 function toggleSenha(btn) {
-  const input = btn.closest('div').querySelector('input');
+  const input = btn.closest('.login-input-wrap').querySelector('input');
   const icon  = btn.querySelector('i');
   if (input.type === 'password') {
     input.type = 'text';
