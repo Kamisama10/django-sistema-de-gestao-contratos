@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acesso Bloqueado — Mobilizze</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #fafafa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 48px 40px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+    .icon {
+      width: 56px; height: 56px;
+      background: #fef2f2;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 26px;
+    }
+    h1 {
+      font-size: 20px; font-weight: 700;
+      color: #09090b; margin-bottom: 10px;
+    }
+    p {
+      font-size: 14px; color: #71717a;
+      line-height: 1.6; margin-bottom: 8px;
+    }
+    .info {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #991b1b;
+      margin: 20px 0;
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #1d4ed8;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+    .logo {
+      font-size: 15px; font-weight: 700;
+      color: #09090b; margin-bottom: 32px;
+    }
+    .logo span { color: #1d4ed8; }
+  </style>
+</head>
+<body>
+  <div class="logo">Mobilizze<span>.</span></div>
+  <div class="card">
+    <div class="icon">🔒</div>
+    <h1>Acesso temporariamente bloqueado</h1>
+    <p>Muitas tentativas de login incorretas foram detectadas neste endereço IP.</p>
+    <div class="info">
+      Por segurança, o acesso foi bloqueado por <strong>1 hora</strong>.<br>
+      Se você esqueceu sua senha, contate o administrador do sistema.
+    </div>
+    <p style="font-size:12px;color:#a1a1aa;">
+      Se você é o administrador, acesse <strong>/admin/</strong>
+      para desbloquear manualmente.
+    </p>
+    <a href="/accounts/login/">← Voltar para o login</a>
+  </div>
+</body>
+</html>

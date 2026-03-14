@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV 'C:\Users\kamis\Desktop\REPOSITORIOS\04_PROJETOS_PROFISSIONAIS\mobilize-sistema-de-gestao-contratos\venv'
+set -gx VIRTUAL_ENV 'C:\Users\kamis\Desktop\REPOSITORIOS\04_PROJETOS_PROFISSIONAIS\django-sistema-de-gestao-contratos\venv'
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"Scripts $PATH

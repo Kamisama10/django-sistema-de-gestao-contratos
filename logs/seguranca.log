@@ -1,0 +1,3 @@
+[2026-03-14 12:30:08,414] WARNING django.security.SuspiciousSession — Session data corrupted
+[2026-03-14 12:30:08,505] WARNING django.security.SuspiciousSession — Session data corrupted
+[2026-03-14 12:30:12,710] WARNING django.security.SuspiciousSession — Session data corrupted

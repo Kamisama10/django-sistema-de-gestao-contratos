@@ -2,11 +2,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django_ratelimit.decorators import ratelimit
 from .forms import LoginForm, CadastroForm
 
 
+@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def login_view(request):
-    # Redireciona se já está logado
     if request.user.is_authenticated:
         return redirect('contratos:dashboard')
 
@@ -15,7 +16,6 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            # Redireciona para a página que tentou acessar, se houver
             next_url = request.GET.get('next', 'contratos:dashboard')
             return redirect(next_url)
         else:
@@ -26,6 +26,7 @@ def login_view(request):
     return render(request, 'accounts/login.html', {'form': form})
 
 
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def cadastro_view(request):
     if request.user.is_authenticated:
         return redirect('contratos:dashboard')
